@@ -72,26 +72,13 @@ function processForm(formObject) {
 
 function addDataToSheet(response){
   //This is just to show it's actually possible to insert data into Google Sheets.
-  var book = response.items[0].volumeInfo;
-  var ISBN13 = JSON.stringify(book.industryIdentifiers[0].identifier);
-  var title = book.title;
-  var authors = JSON.stringify(book.authors);
-  var publisher = book.publisher;
-  var description = book.description;
-  var categories = JSON.stringify(book.categories);
-
-  sheet.appendRow([ISBN13, title, authors, publisher, description, categories]);
+  sheet.appendRow(['ISBN', response.items[0].volumeInfo.title]);
 }
 
 function getBookInfoWithIsbn(isbn){
   var uri = 'https://www.googleapis.com/books/v1/volumes?q=isbn:' + isbn;
   var response = UrlFetchApp.fetch(uri, {'muteHttpExceptions': true});
   return response;
-}
-
-// some fields are arrays, lets parse them out
-// so they are easy to read in a row
-function parseMyList(list) {
 }
 
 function addToHashMap(response){
