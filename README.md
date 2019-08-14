@@ -13,3 +13,5 @@ To contribute, pull the code using the extension and test it on your copy of the
 
 ### TO use/test
 Go the menu, enter a ISBN {paste an example here} 
+
+TODO: branch conventions, but probably make your own branch for your stuff and merge to master via PR
