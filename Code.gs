@@ -94,6 +94,18 @@ function getBookInfoWithIsbn(isbn){
 function parseMyList(list) {
 }
 
+//prase list items to comma separated string
+function parseListToCommaSeparatedString(list) {
+  var comma_separated_string = "";
+  for (var i = 0; i < list.length; i++){
+    comma_separated_string + list[i];
+    if (i != list -1){
+      comma_separated_list + ', ';
+    }
+  }
+  return comma_separated_list;
+}
+
 function addToHashMap(response){
   var book = response.items[0].volumeInfo;
   var map = {};
