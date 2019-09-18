@@ -2,10 +2,12 @@ var ui = SpreadsheetApp.getUi();
 var breakTag = '<br>';
 var sheet = SpreadsheetApp.getActiveSheet();
 
+
 //Add menu items on Google Sheets
 function onOpen() {
   ui.createMenu('Book Inventory')
       .addItem('Add Books', 'menuItem1')
+      .addItem('Search', 'menuItem2')
       .addToUi();
 }
 
@@ -17,6 +19,16 @@ function menuItem1() {
   
   SpreadsheetApp.getUi() 
      .showModalDialog(html, 'Add Books');
+}
+
+//Action when the Book Inveontory -> Book Inventory menu item is selected.
+function menuItem2() {
+  var html = HtmlService.createHtmlOutputFromFile('Search')
+  .setWidth(600)
+  .setHeight(800);
+  
+  SpreadsheetApp.getUi() 
+     .showModalDialog(html, 'Search');
 }
 
 function processForm(formObject) {
@@ -67,6 +79,10 @@ function processForm(formObject) {
   addDataToSheet(response);
   
   return output.getContent();
+}
+
+function processSearch(formObject) {
+  return null; 
 }
 
 

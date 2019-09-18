@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <script>   
+    function handleFormSubmit(formObject) {
+        Logger.log("HELLO WORLD");
+        google.script.run.withSuccessHandler(display).processSearch(formObject);
+    }
+    </script>
+  </head>
+  
+  <body>
+    <form onsubmit="handleFormSubmit(this)">
+        ISBN: <input type="search" name="ISBN"> <br>
+        Title: <input type="search" name="Title"> <br>
+        Description: <input type="search" name="Description"> <br>
+        Subject: <input type="search" name="Subject"> <br>
+        <input type="submit" value="Submit">
+    </form>
+  <input type="submit" value="Close" onclick="google.script.host.close()" />
+  <div id="output"></div>
+  </body>
+</html>
+
+
