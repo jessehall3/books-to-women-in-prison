@@ -2,25 +2,56 @@
 <html>
   <head>
     <base target="_top">
-    <script>   
-    function handleFormSubmit(formObject) {
-        Logger.log("HELLO WORLD");
-        google.script.run.withSuccessHandler(display).processSearch(formObject);
-    }
+    <script>
+    
+    // Prevent forms from submitting.
+      function preventFormSubmit() {
+        var forms = document.querySelectorAll('form');
+        for (var i = 0; i < forms.length; i++) {
+          forms[i].addEventListener('submit', function(event) {
+            event.preventDefault();
+          });
+        }
+      }
+      window.addEventListener('load', preventFormSubmit);
+      
+       function handleFormSubmit(formObject) {
+        console.info(formObject)
+        var result = google.script.run.withSuccessHandler(display).processSearch(formObject);
+        document.getElementById("output").innerHTML = result;
+      }
+      
+      function display(searchResult) {
+        var div = document.getElementById('output');
+        div.innerHTML = searchResult;
+      }
+      
+      function clearSearchResult(){
+      var div = document.getElementById('output');
+      div.innerHTML = "";
+      }
+      
     </script>
   </head>
   
   <body>
     <form onsubmit="handleFormSubmit(this)">
-        ISBN: <input type="search" name="ISBN"> <br>
-        Title: <input type="search" name="Title"> <br>
-        Description: <input type="search" name="Description"> <br>
-        Subject: <input type="search" name="Subject"> <br>
-        <input type="submit" value="Submit">
-    </form>
+  ISBN: <input type="text" name="isbn"> <br>
+  Title: <input type="text" name="title"> <br>
+  Description <input type = "text" name = "description"> <br>
+  Author <input type = "text" name = "author"> <br>
+
+  <input type="submit" value="Submit">
+  </form>
+  <br>
+  <input type="submit" value="Clear Search" onclick="clearSearchResult()" />
   <input type="submit" value="Close" onclick="google.script.host.close()" />
+
   <div id="output"></div>
   </body>
 </html>
+
+
+
 
 
