@@ -2,10 +2,12 @@ var ui = SpreadsheetApp.getUi();
 var breakTag = '<br>';
 var sheet = SpreadsheetApp.getActiveSheet();
 
+
 //Add menu items on Google Sheets
 function onOpen() {
   ui.createMenu('Book Inventory')
       .addItem('Add Books', 'menuItem1')
+      .addItem('Search', 'menuItem2')
       .addToUi();
 }
 
@@ -19,15 +21,22 @@ function menuItem1() {
      .showModalDialog(html, 'Add Books');
 }
 
+//Action when the Book Inveontory -> Book Inventory menu item is selected.
+function menuItem2() {
+  var html = HtmlService.createHtmlOutputFromFile('Search')
+  .setWidth(600)
+  .setHeight(800);
+  SpreadsheetApp.getUi() 
+     .showModalDialog(html, 'Search');
+}
+
 function processForm(formObject) {
   var isbn = formObject.isbn;
-  
   var response = JSON.parse(getBookInfoWithIsbn(isbn));
   addToHashMap(response);
   if (response.totalItems == 0){
     ui.alert("Book is not found.");
   }
-
   var book = response.items[0].volumeInfo;
   var output = HtmlService.createHtmlOutput('<b>Search Result:</b>');
   output.append(breakTag);
@@ -69,6 +78,108 @@ function processForm(formObject) {
   return output.getContent();
 }
 
+//Wrote the process search function. me
+function processSearch(formObject) {
+  var result = "";
+  //These constants correspond to the columns in the spreadsheet representing these piece of information
+  const ISBN_COL = 1;
+  const TITLE_COL = 2;
+  const AUTHOR_COL = 3;
+  const DESCRIPTION_COL = 5;
+ 
+  var ISBNColValues = sheet.getRange(2, ISBN_COL, sheet.getLastRow()).getValues(); //1st is header row
+  var titleColValues = sheet.getRange(2, TITLE_COL, sheet.getLastRow()).getValues(); //1st is header row
+  var authorColValues = sheet.getRange(2, AUTHOR_COL, sheet.getLastRow()).getValues(); //1st is header row
+  var DescriptionColValues = sheet.getRange(2, DESCRIPTION_COL, sheet.getLastRow()).getValues(); //1st is header row
+
+  var ISBNSearchResult = ISBNColValues.findIndex(formObject.isbn) + 2; //MUST ADD BACK 2 TO CORRECT FOR TITLE ROW
+  var titleSearchResult = titleColValues.findIndex(formObject.title) + 2; //MUST ADD BACK 2 TO CORRECT FOR TITLE ROW
+  var authorSearchResult = authorColValues.findIndex(formObject.author) + 2; //MUST ADD BACK 2 TO CORRECT FOR TITLE ROW
+  var descriptionSearchResult = DescriptionColValues.findIndex(formObject.description) + 2; //MUST ADD BACK 2 TO CORRECT FOR TITLE ROW
+
+  //TODO: Bug where there is a two printed at end of list of indexes
+  console.info("ISBN: " + ISBNSearchResult + "TEST");
+  if (ISBNSearchResult && (ISBNSearchResult.length > 0)){
+    result += "ISBN : Col-" + ISBN_COL + " Row-" + JSON.stringify(ISBNSearchResult) + "<br>";
+  }
+  if (titleSearchResult && (titleSearchResult.length > 0)){
+    result += "TITLE : Col-" + TITLE_COL + " Row-" + JSON.stringify(titleSearchResult) + "<br>";
+  }
+  if (authorSearchResult && (authorSearchResult.length > 0)){
+    result += "AUTHOR : Col-" + AUTHOR_COL + " Row-" + JSON.stringify(authorSearchResult) + "<br>";
+  }
+  if (descriptionSearchResult && (descriptionSearchResult.length > 0)){
+    result += "DESCRIPTION : Col-" + DESCRIPTION_COL + " Row-" + JSON.stringify(descriptionSearchResult) + "<br>";
+  }
+  if (result == ""){
+    result = "No results from any fields in the search";
+  }
+  console.info(result);
+  return result;
+  
+}
+
+// Compute the edit distance between the two given strings
+//https://en.wikipedia.org/wiki/Edit_distance
+function getEditDistance(a, b) {
+  if (a.length === 0) return b.length; 
+  if (b.length === 0) return a.length;
+  var matrix = [];
+  // increment along the first column of each row
+  var i;
+  for (i = 0; i <= b.length; i++) {
+    matrix[i] = [i];
+  }
+  // increment each column in the first row
+  var j;
+  for (j = 0; j <= a.length; j++) {
+    matrix[0][j] = j;
+  }
+  // Fill in the rest of the matrix
+  for (i = 1; i <= b.length; i++) {
+    for (j = 1; j <= a.length; j++) {
+      if (b.charAt(i-1) == a.charAt(j-1)) {
+        matrix[i][j] = matrix[i-1][j-1];
+      } else {
+        matrix[i][j] = Math.min(matrix[i-1][j-1] + 1, // substitution
+                                Math.min(matrix[i][j-1] + 1, // insertion
+                                         matrix[i-1][j] + 1)); // deletion
+      }
+    }
+  }
+
+  return matrix[b.length][a.length];
+};
+
+//this is used in the processSearch function.
+//I can't say here or there if this use of prototypes is good practice
+//but im not going to change it at this time. 
+//https://stackoverflow.com/questions/18482143/search-spreadsheet-by-column-return-rows
+Array.prototype.findIndex = function(search){
+  
+  if(search == "") return false;
+  var results = [];
+  for (var i=0; i<this.length; i++){
+    var s1 = String(this[i]);
+    var s2 = String(search);
+    if (5 > getEditDistance(s1, s2)) {
+      //i+2 corrects for title rows
+      results.push(i+2)
+      //console.info("HIT: " + this[i] + " , " +  search + " , " + getEditDistance(s1, s2));
+    }
+    //else{
+    //  console.info("MISS: " + this[i] + " , " +  search + " , " +   getEditDistance(s1, s2));
+    //}   
+    //if (this[i] == search) return i;
+  }
+  if (results.length == 0) {
+    // array empty or does not exist
+    console.log("EMPTY RESULTS: " + results)
+    return null
+  }
+  return results;
+} 
+
 
 function addDataToSheet(response){
   //This is just to show it's actually possible to insert data into Google Sheets.
@@ -94,6 +205,18 @@ function getBookInfoWithIsbn(isbn){
 function parseMyList(list) {
 }
 
+//prase list items to comma separated string
+function parseListToCommaSeparatedString(list) {
+  var comma_separated_string = "";
+  for (var i = 0; i < list.length; i++){
+    comma_separated_string + list[i];
+    if (i != list -1){
+      comma_separated_list + ', ';
+    }
+  }
+  return comma_separated_list;
+}
+
 function addToHashMap(response){
   var book = response.items[0].volumeInfo;
   var map = {};
@@ -107,6 +230,6 @@ function addToHashMap(response){
     }
   }
     map["Authors"] = authorList;
-  map
   return map;
 }
+
