@@ -16,7 +16,10 @@
       window.addEventListener('load', preventFormSubmit);
       
        function handleFormSubmit(formObject) {
-        google.script.run.withSuccessHandler(display).processForm(formObject);
+        console.info(formObject)
+        var result = google.script.run.withSuccessHandler(display).processForm(formObject);
+        document.getElementById("p1").innerHTML = result;
+
       }
       
       function display(searchResult) {
@@ -39,6 +42,7 @@
   </form>
   <input type="submit" value="Clear Search" onclick="clearSearchResult()" />
   <input type="submit" value="Close" onclick="google.script.host.close()" />
+  <p id = "result"> </p> 
   <div id="output"></div>
   </body>
 </html>

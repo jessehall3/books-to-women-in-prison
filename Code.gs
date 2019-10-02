@@ -126,25 +126,21 @@ function processSearch(formObject) {
 // Compute the edit distance between the two given strings
 function getEditDistance(a, b) {
   console.info("IN SED")
-  console.info(a)
-  console.info(b)
+  console.info("a: " + a)
+  console.info("b: " + b)
   if (a.length === 0) return b.length; 
   if (b.length === 0) return a.length;
-
   var matrix = [];
-
   // increment along the first column of each row
   var i;
   for (i = 0; i <= b.length; i++) {
     matrix[i] = [i];
   }
-
   // increment each column in the first row
   var j;
   for (j = 0; j <= a.length; j++) {
     matrix[0][j] = j;
   }
-
   // Fill in the rest of the matrix
   for (i = 1; i <= b.length; i++) {
     for (j = 1; j <= a.length; j++) {
@@ -166,10 +162,12 @@ function getEditDistance(a, b) {
 //but im not going to change it at this time. 
 //https://stackoverflow.com/questions/18482143/search-spreadsheet-by-column-return-rows
 Array.prototype.findIndex = function(search){
+  
   if(search == "") return false;
+  
+  console.info("SED TEST : " + getEditDistance("string", "string"));
+  console.info("SEARCH : " + search);
   for (var i=0; i<this.length; i++)
-    console.info("SEARCH : " + search)
-    console.info("SED : " + getEditDistance(toString(this[i]), toString(search)));
     if (this[i] == search) return i;
 
   return -1;
