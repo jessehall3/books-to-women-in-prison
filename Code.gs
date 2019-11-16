@@ -177,23 +177,25 @@ Array.prototype.findIndex = function(search){
 } 
 
 function addDataToSearchDatabase(book){
-  console.info('foo');
-  var uri = 'https://webhook.site/98b4f6cf-abaa-4556-8864-d2cca49cad1d';
-//  var response = UrlFetchApp.fetch(uri, {'muteHttpExceptions': true});
+  var bookData = {
+    isbn: book.industryIdentifiers[0].identifier,
+    title: book.title,
+    authors: book.authors,
+    publisher: book.publisher,
+    description: book.description,
+    categories: book.categories
+  }
   
-  var formData = {
-    'name': 'Bob Smith',
-    'email': 'bob@example.com',
-  };
+  var uri = 'https://webhook.site/98b4f6cf-abaa-4556-8864-d2cca49cad1d';
+  
   var options = {
     'method' : 'post',
-    'payload' : formData,
+    'contentType': 'application/json',
+    'payload' : JSON.stringify(bookData),
     'muteHttpExceptions': true
   };
   
-//  UrlFetchApp.fetch('https://httpbin.org/post', options);
-  var response = UrlFetchApp.fetch(uri, options);
-
+  UrlFetchApp.fetch(uri, options);
 }
 
 function addDataToSheet(book){
