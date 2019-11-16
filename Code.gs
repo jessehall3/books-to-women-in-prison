@@ -1,6 +1,7 @@
 var ui = SpreadsheetApp.getUi();
 var breakTag = '<br>';
 var sheet = SpreadsheetApp.getActiveSheet();
+var HARRY_POTTER = 'https://www.googleapis.com/books/v1/volumes?q=isbn:0747532699';
 
 
 //Add menu items on Google Sheets
@@ -33,7 +34,6 @@ function menuItem2() {
 function processForm(formObject) {
   var isbn = formObject.isbn;
   var response = JSON.parse(getBookInfoWithIsbn(isbn));
-  addToHashMap(response);
   if (response.totalItems == 0){
     ui.alert("Book is not found.");
   }
@@ -73,7 +73,10 @@ function processForm(formObject) {
   output.append(breakTag);
   Logger.log(response.items[0].searchInfo);
   output.append('<b>Text Snippet: </b>' + response.items[0].searchInfo.textSnippet);
-  addDataToSheet(response);
+  
+  addDataToSheet(book);
+  
+  addDataToSearchDatabase(book);
   
   return output.getContent();
 }
@@ -173,10 +176,28 @@ Array.prototype.findIndex = function(search){
   return -1;
 } 
 
+function addDataToSearchDatabase(book){
+  console.info('foo');
+  var uri = 'https://webhook.site/98b4f6cf-abaa-4556-8864-d2cca49cad1d';
+//  var response = UrlFetchApp.fetch(uri, {'muteHttpExceptions': true});
+  
+  var formData = {
+    'name': 'Bob Smith',
+    'email': 'bob@example.com',
+  };
+  var options = {
+    'method' : 'post',
+    'payload' : formData,
+    'muteHttpExceptions': true
+  };
+  
+//  UrlFetchApp.fetch('https://httpbin.org/post', options);
+  var response = UrlFetchApp.fetch(uri, options);
 
-function addDataToSheet(response){
+}
+
+function addDataToSheet(book){
   //This is just to show it's actually possible to insert data into Google Sheets.
-  var book = response.items[0].volumeInfo;
   var ISBN13 = JSON.stringify(book.industryIdentifiers[0].identifier);
   var title = book.title;
   var authors = JSON.stringify(book.authors);
@@ -189,40 +210,8 @@ function addDataToSheet(response){
 
 function getBookInfoWithIsbn(isbn){
   var uri = 'https://www.googleapis.com/books/v1/volumes?q=isbn:' + isbn;
+  uri =  HARRY_POTTER;
   var response = UrlFetchApp.fetch(uri, {'muteHttpExceptions': true});
   return response;
-}
-
-// some fields are arrays, lets parse them out
-// so they are easy to read in a row
-function parseMyList(list) {
-}
-
-//prase list items to comma separated string
-function parseListToCommaSeparatedString(list) {
-  var comma_separated_string = "";
-  for (var i = 0; i < list.length; i++){
-    comma_separated_string + list[i];
-    if (i != list -1){
-      comma_separated_list + ', ';
-    }
-  }
-  return comma_separated_list;
-}
-
-function addToHashMap(response){
-  var book = response.items[0].volumeInfo;
-  var map = {};
-  map["Title"] = book.title ? book.title: "";
-  map["Subtitle"] =  book.subtitle ? book.subtitle : "";
-  var authorList = "";
-  for (var i = 0; i < book.authors.length; i++){
-    authorList + book.authors[i];
-    if (i != book.authors.length -1){
-      authorList + ', ';
-    }
-  }
-    map["Authors"] = authorList;
-  return map;
 }
 
