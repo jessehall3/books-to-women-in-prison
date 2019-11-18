@@ -1,8 +1,7 @@
 var ui = SpreadsheetApp.getUi();
 var breakTag = '<br>';
 var sheet = SpreadsheetApp.getActiveSheet();
-var HARRY_POTTER = 'https://www.googleapis.com/books/v1/volumes?q=isbn:0747532699';
-
+var ENDPOINT_TO_POST_DATA_TO_ALGOLIA = "https://us-central1-books-259218.cloudfunctions.net/function-1";
 
 //Add menu items on Google Sheets
 function onOpen() {
@@ -186,9 +185,6 @@ function addDataToSearchDatabase(book){
     categories: book.categories
   }
 
-//  var uri = 'https://webhook.site/98b4f6cf-abaa-4556-8864-d2cca49cad1d';
-  var uri = "https://us-central1-books-259218.cloudfunctions.net/function-1";
-
   var options = {
     'method' : 'post',
     'contentType': 'application/json',
@@ -196,7 +192,9 @@ function addDataToSearchDatabase(book){
     'muteHttpExceptions': true
   };
 
-  var request_status = UrlFetchApp.fetch(uri, options);
+  var uri = ENDPOINT_TO_POST_DATA_TO_ALGOLIA;
+
+  UrlFetchApp.fetch(uri, options);
 }
 
 function addDataToSheet(book){
@@ -213,7 +211,6 @@ function addDataToSheet(book){
 
 function getBookInfoWithIsbn(isbn){
   var uri = 'https://www.googleapis.com/books/v1/volumes?q=isbn:' + isbn;
-  uri =  HARRY_POTTER;
   var response = UrlFetchApp.fetch(uri, {'muteHttpExceptions': true});
   return response;
 }
