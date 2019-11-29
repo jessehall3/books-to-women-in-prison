@@ -8,6 +8,7 @@ function onOpen() {
   ui.createMenu('Book Inventory')
       .addItem('Add Books', 'menuItem1')
       .addItem('Search', 'menuItem2')
+      .addItem('Sidebar Search', 'menuItem3')
       .addToUi();
 }
 
@@ -28,6 +29,77 @@ function menuItem2() {
   .setHeight(800);
   SpreadsheetApp.getUi()
      .showModalDialog(html, 'Search');
+}
+
+function menuItem3() {
+  var html = HtmlService.createHtmlOutputFromFile('SidebarSearch')
+    .setTitle('Search Books')
+    .setWidth(300);
+  SpreadsheetApp.getUi()
+    .showSidebar(html);
+}
+
+function setFilter() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+
+  var filterSettings = {};
+
+  // The range of data on which you want to apply the filter.
+  // optional arguments: startRowIndex, startColumnIndex, endRowIndex, endColumnIndex
+  filterSettings.range = {
+    sheetId: ss.getActiveSheet().getSheetId()
+  };
+
+  // Criteria for showing/hiding rows in a filter
+  // https://developers.google.com/sheets/api/reference/rest/v4/FilterCriteria
+  filterSettings.criteria = {};
+  var columnIndex = 0;
+
+  var HARRY_POTTER_ISBN = "0747532699"
+
+  // ------------------------------------------------
+  var HARRY_POTTER_ISBN = "0747532699"
+  var HIGH_RISERS_ISBN = "0062235060";
+
+  var conditionValue = {
+    "userEnteredValue": HARRY_POTTER_ISBN
+  }
+
+  var booleanCondition = {
+    "type": "TEXT_CONTAINS",
+    "values": [
+      conditionValue
+    ]
+  }
+
+  var filterCriteria = {
+    "condition": booleanCondition
+  };
+
+  filterSettings['criteria'][columnIndex] = filterCriteria;
+
+  var request = {
+    "setBasicFilter": {
+      "filter": filterSettings
+    }
+  };
+
+  Sheets.Spreadsheets.batchUpdate({'requests': [request]}, ss.getId());
+}
+
+function clearFilter() {
+
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+
+  var filter = {
+    sheetId: ss.getActiveSheet().getSheetId()
+  };
+
+  var request = {
+    "clearBasicFilter": filter
+  };
+
+  Sheets.Spreadsheets.batchUpdate({'requests': [request]}, ss.getId());
 }
 
 function processForm(formObject) {
