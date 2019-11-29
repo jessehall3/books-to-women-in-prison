@@ -39,34 +39,26 @@ function menuItem3() {
     .showSidebar(html);
 }
 
-function setFilter() {
+function buildRequest(searchTerm){
   var ss = SpreadsheetApp.getActiveSpreadsheet();
 
   var filterSettings = {};
 
-  // The range of data on which you want to apply the filter.
-  // optional arguments: startRowIndex, startColumnIndex, endRowIndex, endColumnIndex
   filterSettings.range = {
     sheetId: ss.getActiveSheet().getSheetId()
   };
 
-  // Criteria for showing/hiding rows in a filter
-  // https://developers.google.com/sheets/api/reference/rest/v4/FilterCriteria
   filterSettings.criteria = {};
   var columnIndex = 0;
 
-  var HARRY_POTTER_ISBN = "0747532699"
 
-  // ------------------------------------------------
-  var HARRY_POTTER_ISBN = "0747532699"
-  var HIGH_RISERS_ISBN = "0062235060";
 
   var conditionValue = {
-    "userEnteredValue": HARRY_POTTER_ISBN
+    "userEnteredValue": "=REGEXMATCH(B:B, \"(?i)" + searchTerm + "\")"
   }
 
   var booleanCondition = {
-    "type": "TEXT_CONTAINS",
+    "type": "CUSTOM_FORMULA",
     "values": [
       conditionValue
     ]
@@ -83,6 +75,19 @@ function setFilter() {
       "filter": filterSettings
     }
   };
+
+  return request;
+}
+
+function setFilter() {
+  var HARRY_POTTER_ISBN = "0747532699"
+  var HIGH_RISERS_ISBN = "0062235060";
+
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+
+  var searchTerm = "har"
+
+  var request = buildRequest(searchTerm)
 
   Sheets.Spreadsheets.batchUpdate({'requests': [request]}, ss.getId());
 }
