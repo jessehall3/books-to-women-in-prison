@@ -39,7 +39,7 @@ function menuItem3() {
     .showSidebar(html);
 }
 
-function buildRequest(searchTerm){
+function buildRequest(isbnNumber){
   var ss = SpreadsheetApp.getActiveSpreadsheet();
 
   var filterSettings = {};
@@ -51,12 +51,14 @@ function buildRequest(searchTerm){
   filterSettings.criteria = {};
   var columnIndex = 0;
 
+
+
   var conditionValue = {
-    "userEnteredValue": "=REGEXMATCH(B:B, \"(?i)" + searchTerm + "\")"
+    "userEnteredValue": isbnNumber
   }
 
   var booleanCondition = {
-    "type": "CUSTOM_FORMULA",
+    "type": "TEXT_CONTAINS",
     "values": [
       conditionValue
     ]
@@ -77,12 +79,29 @@ function buildRequest(searchTerm){
   return request;
 }
 
-function setFilter(searchTerm) {
+function setFilter() {
+  var HARRY_POTTER_ISBN = "0747532699"
+  var HIGH_RISERS_ISBN = "0062235060";
+
   var ss = SpreadsheetApp.getActiveSpreadsheet();
 
-  var request = buildRequest(searchTerm)
+  var harry_potter_request = buildRequest(HARRY_POTTER_ISBN)
+  var high_risers_request = buildRequest(HIGH_RISERS_ISBN)
 
-  Sheets.Spreadsheets.batchUpdate({'requests': [request]}, ss.getId());
+  var isbnNumbers = [HARRY_POTTER_ISBN, HIGH_RISERS_ISBN]
+
+  var regex_pattern = isbnNumbers.join("|")
+
+  var UserEnteredValue = "=AND(NOT(ISBLANK(A2)),(1*REGEXEXTRACT(A2,\"\\d+\"))>(1*REGEXEXTRACT(B2,\"\\d+\")))"
+  var foo = REGEXMATCH(A2, "[0-9]+")
+  var foo =OR(REGEXMATCH(B2, "Har"), REGEXMATCH(D2, "Har"))
+  // =REGEXMATCH(B2, "(?i)oo|har")
+  // =REGEXMATCH(A2, "0747532699|0062235060")
+  var rowCount = mySheet.getMaxRows()
+  var foo = 'REGEXMATCH(A1:A' + rowCount +  ', ' +  regex_pattern + ')'
+
+
+  Sheets.Spreadsheets.batchUpdate({'requests': [harry_potter_request, high_risers_request]}, ss.getId());
 }
 
 function clearFilter() {

@@ -4,15 +4,47 @@
     <base target="_top">
   </head>
   <body>
-    <input type="button" value="Set Filter" onclick="google.script.run.setFilter()" />
-    <input type="button" value="Clear Filter" onclick="google.script.run.clearFilter()" />
+    Title: <input type="text" id="title-input" autocomplete="off" placeholder="War And Peace">
+    <br>
+    <input type="button" value="Search" id="title-submit">
+    <input type="submit" value="Clear" id="clear-button"/>
     <hr>
-    <input type="button" value="Close" onclick="closeSidebar()" />
+    <input type="button" value="Close" id="close-button"/>
   </body>
   <script>
+  (function() {
+    const DOM = {};
+    DOM.titleSubmit = document.querySelector("#title-submit");
+    DOM.titleInput = document.querySelector("#title-input");
+    DOM.clearButton = document.querySelector("#clear-button");
+    DOM.closeButton = document.querySelector("#close-button");
+
+    function search(e){
+      e.preventDefault();
+      searchTerm = DOM.titleInput.value.trim()
+      google.script.run.setFilter(searchTerm)
+    }
+
+    function clearSearch(){
+      google.script.run.clearFilter();
+      DOM.titleInput.value = "";
+    }
+
     function closeSidebar () {
       google.script.run.clearFilter();
       google.script.host.close();
     }
+
+    DOM.titleSubmit.addEventListener("click", search);
+
+    DOM.titleInput.addEventListener("keyup", function(e){
+      if (e.keyCode === 13) {
+        search(e);
+      }
+    });
+
+    DOM.clearButton.addEventListener("click", clearSearch);
+    DOM.closeButton.addEventListener("click", closeSidebar);
+  })();
   </script>
 </html>
