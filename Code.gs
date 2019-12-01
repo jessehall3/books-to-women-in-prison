@@ -1,7 +1,12 @@
+var ENDPOINT_TO_POST_DATA_TO_ALGOLIA = "https://us-central1-books-259218.cloudfunctions.net/function-1";
+var BOOKS_SPREADSHEET_NAME = "Books";
+var TITLE_COLUMN = "B";
+
 var ui = SpreadsheetApp.getUi();
 var breakTag = '<br>';
 var sheet = SpreadsheetApp.getActiveSheet();
-var ENDPOINT_TO_POST_DATA_TO_ALGOLIA = "https://us-central1-books-259218.cloudfunctions.net/function-1";
+var workbook = SpreadsheetApp.getActive();
+var booksSpreadSheet = workbook.getSheetByName(BOOKS_SPREADSHEET_NAME);
 
 //Add menu items on Google Sheets
 function onOpen() {
@@ -39,24 +44,19 @@ function menuItem3() {
     .showSidebar(html);
 }
 
-var BOOKS_SPREADSHEET_NAME = "Books";
-var TITLE_COLUMN = "B";
-var workbook = SpreadsheetApp.getActiveSpreadsheet();
-var booksSpreadSheet = workbook.getSheetByName(BOOKS_SPREADSHEET_NAME);
+function buildRegexMatch(column, searchTerm){
+  // case-insensitive regex regex_pattern
+  var regex = "\"(?i)" + searchTerm + "\"";
+  var range = column + ":" + column;
+  return "=REGEXMATCH(" + range + "," +  regex + ")";
+}
 
-function buildRequest(searchTerm){
+function setSearchFilter(searchTerm){
   var filterSettings = {};
 
   filterSettings.range = {
     sheetId: booksSpreadSheet.getSheetId()
   };
-
-  function buildRegexMatch(column, searchTerm){
-    // case-insensitive regex regex_pattern
-    var regex = "\"(?i)" + searchTerm + "\""
-    var range = column + ":" + column;
-    return "=REGEXMATCH(" + range + "," +  regex + ")";
-  }
 
   var conditionValue = {
     "userEnteredValue": buildRegexMatch(TITLE_COLUMN, searchTerm)
@@ -75,7 +75,8 @@ function buildRequest(searchTerm){
 
   filterSettings.criteria = {};
 
-  var columnIndex = 0; // column index makes no difference given the conditions used here
+  // column index makes no difference given the conditions used here
+  var columnIndex = 0;
 
   filterSettings['criteria'][columnIndex] = filterCriteria;
 
@@ -85,28 +86,19 @@ function buildRequest(searchTerm){
     }
   };
 
-  return request;
-}
-
-function setFilter(searchTerm) {
-  var request = buildRequest(searchTerm)
-
   Sheets.Spreadsheets.batchUpdate({'requests': [request]}, workbook.getId());
 }
 
-function clearFilter() {
-
-  var ss = SpreadsheetApp.getActiveSpreadsheet();
-
+function clearSearchFilter() {
   var filter = {
-    sheetId: ss.getActiveSheet().getSheetId()
+    sheetId: booksSpreadSheet.getSheetId()
   };
 
   var request = {
     "clearBasicFilter": filter
   };
 
-  Sheets.Spreadsheets.batchUpdate({'requests': [request]}, ss.getId());
+  Sheets.Spreadsheets.batchUpdate({'requests': [request]}, workbook.getId());
 }
 
 function processForm(formObject) {

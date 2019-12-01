@@ -22,16 +22,16 @@
     function search(e){
       e.preventDefault();
       searchTerm = DOM.titleInput.value.trim()
-      google.script.run.setFilter(searchTerm)
+      google.script.run.setSearchFilter(searchTerm)
     }
 
     function clearSearch(){
-      google.script.run.clearFilter();
+      google.script.run.clearSearchFilter();
       DOM.titleInput.value = "";
     }
 
     function closeSidebar () {
-      google.script.run.clearFilter();
+      clearSearch();
       google.script.host.close();
     }
 
