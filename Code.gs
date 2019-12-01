@@ -40,6 +40,7 @@ function menuItem3() {
 }
 
 var BOOKS_SPREADSHEET_NAME = "Books";
+var TITLE_COLUMN = "B";
 var workbook = SpreadsheetApp.getActiveSpreadsheet();
 var booksSpreadSheet = workbook.getSheetByName(BOOKS_SPREADSHEET_NAME);
 
@@ -50,11 +51,14 @@ function buildRequest(searchTerm){
     sheetId: booksSpreadSheet.getSheetId()
   };
 
-  filterSettings.criteria = {};
-  var columnIndex = 0;
 
+  // case-insensitive regex regex_pattern
+  var regex = "\"(?i)" + searchTerm + "\""
+  var range = TITLE_COLUMN + ":" + TITLE_COLUMN
+
+  // "userEnteredValue": "=REGEXMATCH(B:B, \"(?i)" + searchTerm + "\")"
   var conditionValue = {
-    "userEnteredValue": "=REGEXMATCH(B:B, \"(?i)" + searchTerm + "\")"
+    "userEnteredValue": "=REGEXMATCH(" + range + "," +  regex + ")"
   }
 
   var booleanCondition = {
@@ -67,6 +71,10 @@ function buildRequest(searchTerm){
   var filterCriteria = {
     "condition": booleanCondition
   };
+
+  filterSettings.criteria = {};
+
+  var columnIndex = 0; // column index makes no difference given the conditions used here
 
   filterSettings['criteria'][columnIndex] = filterCriteria;
 
