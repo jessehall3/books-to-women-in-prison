@@ -39,13 +39,15 @@ function menuItem3() {
     .showSidebar(html);
 }
 
-function buildRequest(searchTerm){
-  var ss = SpreadsheetApp.getActiveSpreadsheet();
+var BOOKS_SPREADSHEET_NAME = "Books";
+var workbook = SpreadsheetApp.getActiveSpreadsheet();
+var booksSpreadSheet = workbook.getSheetByName(BOOKS_SPREADSHEET_NAME);
 
+function buildRequest(searchTerm){
   var filterSettings = {};
 
   filterSettings.range = {
-    sheetId: ss.getActiveSheet().getSheetId()
+    sheetId: booksSpreadSheet.getSheetId()
   };
 
   filterSettings.criteria = {};
@@ -78,11 +80,9 @@ function buildRequest(searchTerm){
 }
 
 function setFilter(searchTerm) {
-  var ss = SpreadsheetApp.getActiveSpreadsheet();
-
   var request = buildRequest(searchTerm)
 
-  Sheets.Spreadsheets.batchUpdate({'requests': [request]}, ss.getId());
+  Sheets.Spreadsheets.batchUpdate({'requests': [request]}, workbook.getId());
 }
 
 function clearFilter() {
