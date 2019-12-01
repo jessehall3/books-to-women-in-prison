@@ -45,7 +45,8 @@ function menuItem3() {
 }
 
 function buildRegexMatch(column, searchTerm){
-  // case-insensitive regex regex_pattern
+  // case-insensitive regex regex_pattern for entire column
+  // =REGEXMATCH(B:B, \(?i)Harry Potter\)
   var regex = "\"(?i)" + searchTerm + "\"";
   var range = column + ":" + column;
   return "=REGEXMATCH(" + range + "," +  regex + ")";
