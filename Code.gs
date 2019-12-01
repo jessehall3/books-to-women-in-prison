@@ -51,14 +51,15 @@ function buildRequest(searchTerm){
     sheetId: booksSpreadSheet.getSheetId()
   };
 
+  function buildRegexMatch(column, searchTerm){
+    // case-insensitive regex regex_pattern
+    var regex = "\"(?i)" + searchTerm + "\""
+    var range = column + ":" + column;
+    return "=REGEXMATCH(" + range + "," +  regex + ")";
+  }
 
-  // case-insensitive regex regex_pattern
-  var regex = "\"(?i)" + searchTerm + "\""
-  var range = TITLE_COLUMN + ":" + TITLE_COLUMN
-
-  // "userEnteredValue": "=REGEXMATCH(B:B, \"(?i)" + searchTerm + "\")"
   var conditionValue = {
-    "userEnteredValue": "=REGEXMATCH(" + range + "," +  regex + ")"
+    "userEnteredValue": buildRegexMatch(TITLE_COLUMN, searchTerm)
   }
 
   var booleanCondition = {
