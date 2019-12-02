@@ -4,18 +4,31 @@
     <base target="_top">
   </head>
   <body>
-    Title: <input type="text" id="title-input" autocomplete="off" placeholder="War And Peace">
-    <br>
+    Title: <input type="text" id="title-input" class="search-bar" autocomplete="off" placeholder="War And Peace">
     <input type="button" value="Search" id="title-submit">
-    <input type="submit" value="Clear" id="clear-button"/>
+    <br>
+    Algolia: <input type="text" id="everything-input" class="search-bar" autocomplete="off" placeholder="Title, Author, etc.">
+    <input type="button" value="Search" id="everything-submit">
     <hr>
+    <input type="submit" value="Clear" id="clear-button"/>
     <input type="button" value="Close" id="close-button"/>
   </body>
+  <script src="https://cdn.jsdelivr.net/npm/algoliasearch@3/dist/algoliasearchLite.min.js"></script>
   <script>
-  (function() {
+  (function(algoliasearch) {
+    BOOKS_INDEX_NAME = "books"
+    APPLICATION_ID = "A57X6B1PVR"
+    SEARCH_ONLY_API_KEY = "51b6180afab6f0956730332053041294"
+
     const DOM = {};
-    DOM.titleSubmit = document.querySelector("#title-submit");
     DOM.titleInput = document.querySelector("#title-input");
+    DOM.titleSubmit = document.querySelector("#title-submit");
+
+    DOM.everythingInput = document.querySelector("#everything-input");
+    DOM.everythingSubmit = document.querySelector("#everything-submit");
+
+    DOM.searchBars =  document.querySelectorAll(".search-bar");
+
     DOM.clearButton = document.querySelector("#clear-button");
     DOM.closeButton = document.querySelector("#close-button");
 
@@ -25,9 +38,34 @@
       google.script.run.setSearchFilter(searchTerm)
     }
 
+    async function everythingSearch(e){
+      e.preventDefault();
+      searchString = DOM.everythingInput.value.trim()
+
+      const client = algoliasearch(APPLICATION_ID, SEARCH_ONLY_API_KEY);
+      const index = client.initIndex(BOOKS_INDEX_NAME);
+
+      const search = async (searchString) => {
+        return new Promise(function(resolve, reject) {
+          index.search(searchString, (err, { hits } = {}) => {
+            if (err){
+              console.error("Something went wrong.")
+            } else {
+              console.log(JSON.stringify(hits, null, 2))
+            }
+            resolve()
+          })
+        })
+      }
+
+      await search(searchString)
+    }
+
     function clearSearch(){
       google.script.run.clearSearchFilter();
-      DOM.titleInput.value = "";
+      DOM.searchBars.forEach(function(searchBar) {
+        searchBar.value = "";
+      })
     }
 
     function closeSidebar () {
@@ -43,8 +81,16 @@
       }
     });
 
+    DOM.everythingSubmit.addEventListener("click", everythingSearch);
+
+    DOM.everythingInput.addEventListener("keyup", function(e){
+      if (e.keyCode === 13) {
+        everythingSearch(e);
+      }
+    });
+
     DOM.clearButton.addEventListener("click", clearSearch);
     DOM.closeButton.addEventListener("click", closeSidebar);
-  })();
+  })(algoliasearch);
   </script>
 </html>
