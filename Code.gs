@@ -16,8 +16,8 @@ function menuItem1() {
   var html = HtmlService.createHtmlOutputFromFile('AddBooks')
   .setWidth(600)
   .setHeight(800);
-  
-  SpreadsheetApp.getUi() 
+
+  SpreadsheetApp.getUi()
      .showModalDialog(html, 'Add Books');
 }
 
@@ -34,7 +34,7 @@ function processForm(formObject) {
   var rawISBN = formObject.isbn;
 
   // accept ISBN's with dashes and white space
-  var isbn = rawISBN.replace(/\s+|-/g, '');
+  var isbn = rawISBN.replace(/\D/g, '');
 
   var response
   // Loose check for valid ISBN number
@@ -69,9 +69,9 @@ function processForm(formObject) {
   output.append('<b>Publish Date:</b> ' + book.publishedDate);
   output.append(breakTag);
   output.append('<b>Categories: </b> ');
-  
+
   for (var i = 0 ; i < book.categories.length; i++){
-    output.append(book.categories[i]); 
+    output.append(book.categories[i]);
     if (i != book.categories.length -1){
       output.append(', ');
     }
@@ -83,7 +83,7 @@ function processForm(formObject) {
   Logger.log(response.items[0].searchInfo);
   output.append('<b>Text Snippet: </b>' + response.items[0].searchInfo.textSnippet);
   addDataToSheet(response);
-  
+
   return output.getContent();
 }
 
@@ -99,7 +99,7 @@ function processSearch(formObject) {
   const TITLE_COL = 2;
   const AUTHOR_COL = 3;
   const DESCRIPTION_COL = 5;
- 
+
   var ISBNColValues = sheet.getRange(2, ISBN_COL, sheet.getLastRow()).getValues(); //1st is header row
   var titleColValues = sheet.getRange(2, TITLE_COL, sheet.getLastRow()).getValues(); //1st is header row
   var authorColValues = sheet.getRange(2, AUTHOR_COL, sheet.getLastRow()).getValues(); //1st is header row
@@ -110,7 +110,7 @@ function processSearch(formObject) {
   var authorSearchResult = authorColValues.findIndex(formObject.author) + 2; //MUST ADD BACK 2 TO CORRECT FOR TITLE ROW
   var descriptionSearchResult = DescriptionColValues.findIndex(formObject.description) + 2; //MUST ADD BACK 2 TO CORRECT FOR TITLE ROW
 
-  
+
   //titleSearchResult will equal 1 if no results came back
   if (ISBNSearchResult != 1){
     result += "ISBN : Col-" + ISBN_COL + " Row-" + ISBNSearchResult + "<br>";
@@ -129,7 +129,7 @@ function processSearch(formObject) {
   }
   console.info(result);
   return result;
-  
+
 }
 
 // Compute the edit distance between the two given strings
@@ -137,7 +137,7 @@ function getEditDistance(a, b) {
   console.info("IN SED")
   console.info("a: " + a)
   console.info("b: " + b)
-  if (a.length === 0) return b.length; 
+  if (a.length === 0) return b.length;
   if (b.length === 0) return a.length;
   var matrix = [];
   // increment along the first column of each row
@@ -168,19 +168,19 @@ function getEditDistance(a, b) {
 
 //this is used in the processSearch function.
 //I can't say here or there if this use of prototypes is good practice
-//but im not going to change it at this time. 
+//but im not going to change it at this time.
 //https://stackoverflow.com/questions/18482143/search-spreadsheet-by-column-return-rows
 Array.prototype.findIndex = function(search){
-  
+
   if(search == "") return false;
-  
+
   console.info("SED TEST : " + getEditDistance("string", "string"));
   console.info("SEARCH : " + search);
   for (var i=0; i<this.length; i++)
     if (this[i] == search) return i;
 
   return -1;
-} 
+}
 
 
 function addDataToSheet(response){
