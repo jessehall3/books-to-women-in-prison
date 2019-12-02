@@ -1,6 +1,7 @@
 var ENDPOINT_TO_POST_DATA_TO_ALGOLIA = "https://us-central1-books-259218.cloudfunctions.net/function-1";
 var BOOKS_SPREADSHEET_NAME = "Books";
 var TITLE_COLUMN = "B";
+var ISBN_COLUMN = "A";
 
 var ui = SpreadsheetApp.getUi();
 var breakTag = '<br>';
@@ -44,10 +45,13 @@ function menuItem3() {
     .showSidebar(html);
 }
 
-function buildRegexMatch(column, searchTerm){
+function buildRegexMatch(column, searchTerms){
   // case-insensitive regex regex_pattern for entire column
   // =REGEXMATCH(B:B, \(?i)Harry Potter\)
-  var regex = "\"(?i)" + searchTerm + "\"";
+  // accept single values and arrays
+  searchTerms = [].concat(searchTerms)
+  joinedTerms = searchTerms.join("|")
+  var regex = "\"(?i)" + joinedTerms + "\"";
   var range = column + ":" + column;
   return "=REGEXMATCH(" + range + "," +  regex + ")";
 }
@@ -61,6 +65,44 @@ function setSearchFilter(searchTerm){
 
   var conditionValue = {
     "userEnteredValue": buildRegexMatch(TITLE_COLUMN, searchTerm)
+  }
+
+  var booleanCondition = {
+    "type": "CUSTOM_FORMULA",
+    "values": [
+      conditionValue
+    ]
+  }
+
+  var filterCriteria = {
+    "condition": booleanCondition
+  };
+
+  filterSettings.criteria = {};
+
+  // column index makes no difference given the conditions used here
+  var columnIndex = 0;
+
+  filterSettings['criteria'][columnIndex] = filterCriteria;
+
+  var request = {
+    "setBasicFilter": {
+      "filter": filterSettings
+    }
+  };
+
+  Sheets.Spreadsheets.batchUpdate({'requests': [request]}, workbook.getId());
+}
+
+function setIsbnFilter(isbnNumbers){
+  var filterSettings = {};
+
+  filterSettings.range = {
+    sheetId: booksSpreadSheet.getSheetId()
+  };
+
+  var conditionValue = {
+    "userEnteredValue": buildRegexMatch(ISBN_COLUMN, isbnNumbers)
   }
 
   var booleanCondition = {
