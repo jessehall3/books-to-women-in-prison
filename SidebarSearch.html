@@ -22,11 +22,11 @@
     function search(e){
       e.preventDefault();
       searchTerm = DOM.titleInput.value.trim()
-      google.script.run.setSearchFilter(searchTerm)
+      google.script.run.setHiderSearch(searchTerm)
     }
 
     function clearSearch(){
-      google.script.run.clearSearchFilter();
+      google.script.run.clearHiderSearch();
       DOM.titleInput.value = "";
     }
 

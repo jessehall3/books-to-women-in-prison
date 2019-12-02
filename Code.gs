@@ -52,6 +52,37 @@ function buildRegexMatch(column, searchTerm){
   return "=REGEXMATCH(" + range + "," +  regex + ")";
 }
 
+function setHiderSearch(searchTerm){
+  // var lastRowNumber = booksSpreadSheet.getLastRow();
+  // var getRange = ss.getDataRange()
+  // var getRow  = getRange.getRow()
+
+  var TITLE_COLUMN_INDEX = 2;
+  var col = TITLE_COLUMN_INDEX;
+  var numRows = booksSpreadSheet.getLastRow();
+
+  var re = new RegExp(searchTerm.trim(), 'i');
+
+  function is_match(testValue){
+    result = testValue.trim().search(re);
+    return (result != -1);
+  }
+
+  for (var row = 1; col <= numRows; i++){
+    var cell = booksSpreadSheet.getRange(row, col);
+    var cellContent = cell.getValue();
+
+    if (is_match(cellContent)){
+      booksSpreadSheet.hideRow(row);
+    }
+  }
+}
+
+function clearHiderSearch() {
+  var rRows = sh.getRange("A:A");
+  booksSpreadSheet.unhideRow(rRows);
+}
+
 function setSearchFilter(searchTerm){
   var filterSettings = {};
 
