@@ -46,17 +46,21 @@ function menuItem3() {
 }
 
 function buildRegexMatch(column, searchTerms){
-  // case-insensitive regex regex_pattern for entire column
-  // =REGEXMATCH(B:B, \(?i)Harry Potter\)
   // accept single values and arrays
   searchTerms = [].concat(searchTerms)
-  joinedTerms = searchTerms.join("|")
+
+  var joinedTerms = searchTerms.join("|")
+
+  // case-insensitive regex regex_pattern for entire column
+  // =REGEXMATCH(B:B, \(?i)Harry Potter\)
   var regex = "\"(?i)" + joinedTerms + "\"";
+
   var range = column + ":" + column;
+
   return "=REGEXMATCH(" + range + "," +  regex + ")";
 }
 
-function setSearchFilter(searchTerm){
+function setSearchFilter(searchTerms, columnLetter){
   var filterSettings = {};
 
   filterSettings.range = {
@@ -64,7 +68,7 @@ function setSearchFilter(searchTerm){
   };
 
   var conditionValue = {
-    "userEnteredValue": buildRegexMatch(TITLE_COLUMN, searchTerm)
+    "userEnteredValue": buildRegexMatch(columnLetter, searchTerms)
   }
 
   var booleanCondition = {
@@ -94,42 +98,12 @@ function setSearchFilter(searchTerm){
   Sheets.Spreadsheets.batchUpdate({'requests': [request]}, workbook.getId());
 }
 
+function setTitleFilter(searchTerm){
+  setSearchFilter(searchTerm, TITLE_COLUMN)
+}
+
 function setIsbnFilter(isbnNumbers){
-  var filterSettings = {};
-
-  filterSettings.range = {
-    sheetId: booksSpreadSheet.getSheetId()
-  };
-
-  var conditionValue = {
-    "userEnteredValue": buildRegexMatch(ISBN_COLUMN, isbnNumbers)
-  }
-
-  var booleanCondition = {
-    "type": "CUSTOM_FORMULA",
-    "values": [
-      conditionValue
-    ]
-  }
-
-  var filterCriteria = {
-    "condition": booleanCondition
-  };
-
-  filterSettings.criteria = {};
-
-  // column index makes no difference given the conditions used here
-  var columnIndex = 0;
-
-  filterSettings['criteria'][columnIndex] = filterCriteria;
-
-  var request = {
-    "setBasicFilter": {
-      "filter": filterSettings
-    }
-  };
-
-  Sheets.Spreadsheets.batchUpdate({'requests': [request]}, workbook.getId());
+  setSearchFilter(isbnNumbers, ISBN_COLUMN)
 }
 
 function clearSearchFilter() {

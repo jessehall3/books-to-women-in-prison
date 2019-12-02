@@ -32,10 +32,10 @@
     DOM.clearButton = document.querySelector("#clear-button");
     DOM.closeButton = document.querySelector("#close-button");
 
-    function search(e){
+    function titleSearch(e){
       e.preventDefault();
       searchTerm = DOM.titleInput.value.trim()
-      google.script.run.setSearchFilter(searchTerm)
+      google.script.run.setTitleFilter(searchTerm)
     }
 
     async function everythingSearch(e){
@@ -77,11 +77,11 @@
       google.script.host.close();
     }
 
-    DOM.titleSubmit.addEventListener("click", search);
+    DOM.titleSubmit.addEventListener("click", titleSearch);
 
     DOM.titleInput.addEventListener("keyup", function(e){
       if (e.keyCode === 13) {
-        search(e);
+        titleSearch(e);
       }
     });
 
