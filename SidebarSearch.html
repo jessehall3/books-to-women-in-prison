@@ -5,8 +5,9 @@
   </head>
   <body>
     Title: <input type="text" id="title-input" data-column-name="title" class="search-bar" autocomplete="off" placeholder="War And Peace">
-    <input type="button" value="Search" id="title-submit">
+    <br>
     Everything: <input type="text" id="everything-input" data-column-name="everything" class="search-bar" autocomplete="off" placeholder="Title, Author, etc.">
+    <br>
     <input type="button" value="Search" id="search-submit">
     <hr>
     <input type="submit" value="Clear" id="clear-button"/>
@@ -14,8 +15,6 @@
   </body>
   <script>
   (function() {
-    BOOKS_INDEX_NAME = "books"
-
     const DOM = {};
     DOM.titleInput = document.querySelector("#title-input");
     DOM.searchSubmit = document.querySelector("#search-submit");
@@ -53,8 +52,6 @@
       google.script.host.close();
     }
 
-    DOM.searchSubmit.addEventListener("click", submitSearch);
-
     DOM.searchBars.forEach(function(searchBar) {
       searchBar.addEventListener("keyup", function(e){
         if (e.keyCode === 13) {
@@ -63,6 +60,7 @@
       });
     })
 
+    DOM.searchSubmit.addEventListener("click", submitSearch);
     DOM.clearButton.addEventListener("click", clearSearch);
     DOM.closeButton.addEventListener("click", closeSidebar);
   })();
