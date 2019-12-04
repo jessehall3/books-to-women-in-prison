@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+  </head>
+  <body>
+    Title: <input type="text" id="title-input" class="search-bar" autocomplete="off" placeholder="War And Peace">
+    <input type="button" value="Search" id="title-submit">
+    <hr>
+    <input type="submit" value="Clear" id="clear-button"/>
+    <input type="button" value="Close" id="close-button"/>
+  </body>
+  <script>
+  (function() {
+    BOOKS_INDEX_NAME = "books"
+
+    const DOM = {};
+    DOM.titleInput = document.querySelector("#title-input");
+    DOM.titleSubmit = document.querySelector("#title-submit");
+
+    DOM.searchBars =  document.querySelectorAll(".search-bar");
+
+    DOM.clearButton = document.querySelector("#clear-button");
+    DOM.closeButton = document.querySelector("#close-button");
+
+    function titleSearch(e){
+      e.preventDefault();
+      searchTerm = DOM.titleInput.value.trim()
+      // google.script.run.setTitleFilter(searchTerm)
+    }
+
+    function clearSearch(){
+      // google.script.run.clearSearchFilter();
+      DOM.searchBars.forEach(function(searchBar) {
+        searchBar.value = "";
+      })
+    }
+
+    function closeSidebar () {
+      clearSearch();
+      google.script.host.close();
+    }
+
+    DOM.titleSubmit.addEventListener("click", titleSearch);
+
+    DOM.titleInput.addEventListener("keyup", function(e){
+      if (e.keyCode === 13) {
+        titleSearch(e);
+      }
+    });
+
+    DOM.clearButton.addEventListener("click", clearSearch);
+    DOM.closeButton.addEventListener("click", closeSidebar);
+  })();
+  </script>
+</html>
