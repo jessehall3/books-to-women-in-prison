@@ -1,6 +1,14 @@
 var BOOKS_SPREADSHEET_NAME = "Books";
 var ISBN_COLUMN_LETTER = 'A';
 var TITLE_COLUMN_LETTER = 'B';
+var DESCRIPTION_COLUMN_LETTER = 'E';
+
+var column_2_letter {
+  "isbn": ISBN_COLUMN_LETTER,
+  "title": TITLE_COLUMN_LETTER,
+  "description": DESCRIPTION_COLUMN_LETTER,
+  "everything": [ISBN_COLUMN_LETTER, TITLE_COLUMN_LETTER, DESCRIPTION_COLUMN_LETTER]
+}
 
 var ui = SpreadsheetApp.getUi();
 var breakTag = '<br>';

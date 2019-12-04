@@ -4,8 +4,10 @@
     <base target="_top">
   </head>
   <body>
-    Title: <input type="text" id="title-input" class="search-bar" autocomplete="off" placeholder="War And Peace">
+    Title: <input type="text" id="title-input" data-column-name="title" class="search-bar" autocomplete="off" placeholder="War And Peace">
     <input type="button" value="Search" id="title-submit">
+    Everything: <input type="text" id="everything-input" data-column-name="everything" class="search-bar" autocomplete="off" placeholder="Title, Author, etc.">
+    <input type="button" value="Search" id="search-submit">
     <hr>
     <input type="submit" value="Clear" id="clear-button"/>
     <input type="button" value="Close" id="close-button"/>
@@ -16,17 +18,27 @@
 
     const DOM = {};
     DOM.titleInput = document.querySelector("#title-input");
-    DOM.titleSubmit = document.querySelector("#title-submit");
+    DOM.searchSubmit = document.querySelector("#search-submit");
 
     DOM.searchBars =  document.querySelectorAll(".search-bar");
 
     DOM.clearButton = document.querySelector("#clear-button");
     DOM.closeButton = document.querySelector("#close-button");
 
-    function titleSearch(e){
+    function submitSearch(e){
       e.preventDefault();
-      searchTerm = DOM.titleInput.value.trim()
-      google.script.run.setTitleFilter(searchTerm)
+      const searchGroups = []
+      DOM.searchBars.forEach(function(searchBar) {
+        const text = searchBar.value.trim();
+        if(text.length){
+          searchGroups.push({
+            column: searchBar.dataset.columnName,
+            text,
+          })
+        }
+      })
+      alert(JSON.stringify(searchGroups))
+      // google.script.run.setTitleFilter(searchTerm)
     }
 
     function clearSearch(){
@@ -41,13 +53,15 @@
       google.script.host.close();
     }
 
-    DOM.titleSubmit.addEventListener("click", titleSearch);
+    DOM.searchSubmit.addEventListener("click", submitSearch);
 
-    DOM.titleInput.addEventListener("keyup", function(e){
-      if (e.keyCode === 13) {
-        titleSearch(e);
-      }
-    });
+    DOM.searchBars.forEach(function(searchBar) {
+      searchBar.addEventListener("keyup", function(e){
+        if (e.keyCode === 13) {
+          submitSearch(e);
+        }
+      });
+    })
 
     DOM.clearButton.addEventListener("click", clearSearch);
     DOM.closeButton.addEventListener("click", closeSidebar);
