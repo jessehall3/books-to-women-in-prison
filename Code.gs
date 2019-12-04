@@ -1,6 +1,6 @@
 var BOOKS_SPREADSHEET_NAME = "Books";
-var ISBN_COLUMN_INDEX = 2;
-var TITLE_COLUMN_INDEX = 1;
+var ISBN_COLUMN_LETTER = 'A';
+var TITLE_COLUMN_LETTER = 'B';
 
 var ui = SpreadsheetApp.getUi();
 var breakTag = '<br>';
@@ -238,4 +238,77 @@ function addToHashMap(response){
   }
     map["Authors"] = authorList;
   return map;
+}
+
+function buildRegexMatch(column, searchTerms){
+  // accept single values and arrays
+  searchTerms = [].concat(searchTerms)
+
+  var joinedTerms = searchTerms.join("|")
+
+  // case-insensitive regex regex_pattern for entire column
+  // =REGEXMATCH(B:B, \(?i)Harry Potter\)
+  var regex = "\"(?i)" + joinedTerms + "\"";
+
+  var range = column + ":" + column;
+
+  return "=REGEXMATCH(" + range + "," +  regex + ")";
+}
+
+function setSearchFilter(searchTerms, columnLetter){
+  var filterSettings = {};
+
+  filterSettings.range = {
+    sheetId: booksSpreadSheet.getSheetId()
+  };
+
+  var conditionValue = {
+    "userEnteredValue": buildRegexMatch(columnLetter, searchTerms)
+  }
+
+  var booleanCondition = {
+    "type": "CUSTOM_FORMULA",
+    "values": [
+      conditionValue
+    ]
+  }
+
+  var filterCriteria = {
+    "condition": booleanCondition
+  };
+
+  filterSettings.criteria = {};
+
+  // column index makes no difference given the conditions used here
+  var columnIndex = 0;
+
+  filterSettings['criteria'][columnIndex] = filterCriteria;
+
+  var request = {
+    "setBasicFilter": {
+      "filter": filterSettings
+    }
+  };
+
+  Sheets.Spreadsheets.batchUpdate({'requests': [request]}, workbook.getId());
+}
+
+function setTitleFilter(searchTerm){
+  setSearchFilter(searchTerm, TITLE_COLUMN_LETTER)
+}
+
+// function setIsbnFilter(isbnNumbers){
+//   setSearchFilter(isbnNumbers, ISBN_COLUMN_LETTER)
+// }
+
+function clearSearchFilter() {
+  var filter = {
+    sheetId: booksSpreadSheet.getSheetId()
+  };
+
+  var request = {
+    "clearBasicFilter": filter
+  };
+
+  Sheets.Spreadsheets.batchUpdate({'requests': [request]}, workbook.getId());
 }

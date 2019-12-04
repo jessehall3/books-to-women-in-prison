@@ -26,11 +26,11 @@
     function titleSearch(e){
       e.preventDefault();
       searchTerm = DOM.titleInput.value.trim()
-      // google.script.run.setTitleFilter(searchTerm)
+      google.script.run.setTitleFilter(searchTerm)
     }
 
     function clearSearch(){
-      // google.script.run.clearSearchFilter();
+      google.script.run.clearSearchFilter();
       DOM.searchBars.forEach(function(searchBar) {
         searchBar.value = "";
       })
