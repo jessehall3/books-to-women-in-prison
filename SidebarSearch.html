@@ -21,38 +21,24 @@
     DOM.clearButton = document.querySelector("#clear-button");
     DOM.closeButton = document.querySelector("#close-button");
 
-
     function submitSearch(e){
       e.preventDefault();
-      const allColumns = ["isbn", "title", "description"]
-      const searchPairs = {}
       // TODO: refactor all this
+      const searchGroups = []
       const searchFields = document.querySelectorAll(SEARCH_FIELD_CLASS)
       searchFields.forEach(function(searchField) {
         const searchTerm = searchField.value.trim();
         if(searchTerm.length){
-          let columnNames = [searchField.dataset.columnName];
-          if(columnNames[0] == "everything"){
-            columnNames = allColumns
-          }
-          columnNames.forEach(function(columnName){
-            if(searchPairs[columnName]){
-              searchPairs[columnName].push(searchTerm)
-            }
-            else {
-              searchPairs[columnName] = [searchTerm]
-            }
+          searchGroups.push({
+            column: searchField.dataset.columnName,
+            searchTerms: searchTerm,
           })
         }
       })
-      const searchGroups = Object.keys(searchPairs).map(function(key) {
-        return {
-          column: key,
-          searchTerms: searchPairs[key]
-        }
-      });
-      // alert(JSON.stringify(searchGroups, null, 2))
-      google.script.run.sidebarSearch(searchGroups)
+      alert(JSON.stringify(searchGroups, null, 2))
+      if(searchGroups.length){
+        // google.script.run.sidebarSearch(searchGroups)
+      }
     }
 
     function clearSearch(){
@@ -114,14 +100,14 @@
       searchFields.forEach(searchField => addSearchField(searchField));
     }
 
-    function init(){
+    function initialize(){
       addSearchFields(SEARCH_FIELDS);
       DOM.searchSubmit.addEventListener("click", submitSearch);
       DOM.clearButton.addEventListener("click", clearSearch);
       DOM.closeButton.addEventListener("click", closeSidebar);
     }
 
-    init();
+    initialize();
   })();
   </script>
 </html>
