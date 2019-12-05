@@ -34,9 +34,8 @@
           ])
         }
       })
-      alert(JSON.stringify(searchPairs, null, 2))
       if(searchPairs.length){
-        // google.script.run.sidebarSearch(searchPairs)
+        google.script.run.sidebarSearch(searchPairs)
       }
     }
 

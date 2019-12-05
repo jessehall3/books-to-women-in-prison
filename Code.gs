@@ -1,16 +1,12 @@
 var BOOKS_SPREADSHEET_NAME = "Books";
-var ISBN_COLUMN_LETTER = 'A';
-var TITLE_COLUMN_LETTER = 'B';
-var AUTHOR_COLUMN_LETTER = 'C';
-var PUBLISHER_COLUMN_LETTER = 'D';
-var DESCRIPTION_COLUMN_LETTER = 'E';
-var SUBJECT_COLUMN_LETTER = 'F';
 
-var column_2_letter = {
-  "isbn": ISBN_COLUMN_LETTER,
-  "title": TITLE_COLUMN_LETTER,
-  "description": DESCRIPTION_COLUMN_LETTER,
-  "everything": [ISBN_COLUMN_LETTER, TITLE_COLUMN_LETTER, DESCRIPTION_COLUMN_LETTER]
+var columnToletter = {
+  "isbn": "A",
+  "title": "B",
+  "author": "C",
+  "publisher": "D",
+  "description": "E",
+  "subject": "F"
 }
 
 var ui = SpreadsheetApp.getUi();
@@ -251,21 +247,55 @@ function addToHashMap(response){
   return map;
 }
 
-function buildFormula(searchGroups){
-  // each searchGroup:
-  // {
-  //   column: "title",
-  //   searchTerm: "harry"
-  // }
-  var regexMatches = searchGroups.map(function(searchGroup){
-    columnLetter = column_2_letter[searchGroup.column];
-    searchTerms = searchGroup.searchTerms;
-    return buildRegexMatch(columnLetter, searchTerms);
-  });
+function mergeSearchPairs(searchPairs){
+  var merged = {}
+
+  for (var columnName in columnToletter){
+    merged[columnName] = []
+  }
+
+  searchPairs.forEach(function(searchPair){
+    var columnName = searchPair[0]
+    var searchTerm  = searchPair[1]
+
+    if(columnName == "everything"){
+      for (var column in columnToletter){
+        merged[column].push(searchPair[1])
+      }
+    }
+    else {
+      merged[columnName].push(searchTerm)
+    }
+  })
+//
+  var mergedPairs = []
+
+  for (var column in merged){
+    if (merged[column].length){
+      mergedPairs.push([column, merged[column]])
+    }
+  }
+
+  ui.alert(JSON.stringify(mergedPairs, null, 2));
+}
+
+function buildFormula(searchPairs){
+  // each searchPair:
+  // [
+  //   "title", // column name
+  //   "harry" // search term
+  // ]
+  var mergedPairs = mergeSearchPairs(searchPairs);
+
+  // var regexMatches = searchPairs.map(function(searchPair){
+  //   columnLetter = columnToletter[searchPair.column];
+  //   searchTerms = searchPair.searchTerms;
+  //   return buildRegexMatch(columnLetter, searchTerms);
+  // });
 
   // Final formula string will look like:
   // =OR(REGEXMATCH(B2, "Harry"), REGEXMATCH(C2, "Rowling"))
-  return "=OR(" + regexMatches.join(",") + ")"
+  // return "=OR(" + regexMatches.join(",") + ")"
 }
 
 function buildRegexMatch(column, searchTerms){
@@ -283,7 +313,7 @@ function buildRegexMatch(column, searchTerms){
   return "REGEXMATCH(" + range + "," +  regex + ")";
 }
 
-function sidebarSearch(searchGroups){
+function sidebarSearch(searchPairs){
   var filterSettings = {};
 
   filterSettings.range = {
@@ -291,34 +321,34 @@ function sidebarSearch(searchGroups){
   };
 
   var conditionValue = {
-    "userEnteredValue": buildFormula(searchGroups)
+    "userEnteredValue": buildFormula(searchPairs)
   }
 
-  var booleanCondition = {
-    "type": "CUSTOM_FORMULA",
-    "values": [
-      conditionValue
-    ]
-  }
-
-  var filterCriteria = {
-    "condition": booleanCondition
-  };
-
-  filterSettings.criteria = {};
-
-  // column index makes no difference given the conditions used here
-  var columnIndex = 0;
-
-  filterSettings['criteria'][columnIndex] = filterCriteria;
-
-  var request = {
-    "setBasicFilter": {
-      "filter": filterSettings
-    }
-  };
-
-  Sheets.Spreadsheets.batchUpdate({'requests': [request]}, workbook.getId());
+  // var booleanCondition = {
+  //   "type": "CUSTOM_FORMULA",
+  //   "values": [
+  //     conditionValue
+  //   ]
+  // }
+  //
+  // var filterCriteria = {
+  //   "condition": booleanCondition
+  // };
+  //
+  // filterSettings.criteria = {};
+  //
+  // // column index makes no difference given the conditions used here
+  // var columnIndex = 0;
+  //
+  // filterSettings['criteria'][columnIndex] = filterCriteria;
+  //
+  // var request = {
+  //   "setBasicFilter": {
+  //     "filter": filterSettings
+  //   }
+  // };
+  //
+  // Sheets.Spreadsheets.batchUpdate({'requests': [request]}, workbook.getId());
 }
 
 function clearSearchFilter() {
