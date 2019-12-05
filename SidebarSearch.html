@@ -8,6 +8,7 @@
     <br>
     Everything: <input type="text" id="everything-input" data-column-name="everything" class="search-bar" autocomplete="off" placeholder="Title, Author, etc.">
     <br>
+    <div id="search-fields"></div>
     <input type="button" value="Search" id="search-submit">
     <hr>
     <input type="submit" value="Clear" id="clear-button"/>
@@ -16,6 +17,7 @@
   <script>
   (function() {
     const DOM = {};
+    DOM.searchFieldsDiv = document.querySelector("#search-fields");
     DOM.titleInput = document.querySelector("#title-input");
     DOM.searchSubmit = document.querySelector("#search-submit");
 
@@ -64,9 +66,57 @@
     }
 
     function closeSidebar () {
-      clearSearch();
+
+
+
       google.script.host.close();
     }
+
+    // From: https://stackoverflow.com/a/1026087
+    // Steve Harrison: https://stackoverflow.com/users/48492/steve-harrison
+    function capitalize(string) {
+      return string.charAt(0).toUpperCase() + string.slice(1);
+    }
+
+    function addSearchField(name){
+      // Title: <input type="text" id="title-input"
+      // data-column-name="title" class="search-field"
+      // autocomplete="off">
+
+      const fieldInput = document.createElement("input");
+
+      const inputAttributes = []
+
+      const inputType = document.createAttribute("type")
+      inputType.value = "text";
+      inputAttributes.push(inputType)
+
+      const inputClass = document.createAttribute("class")
+      inputClass.value = `search-field`;
+      inputAttributes.push(inputClass)
+
+      const inputAutocomplete = document.createAttribute("autocomplete")
+      inputAutocomplete.value = `off`;
+      inputAttributes.push(inputAutocomplete)
+
+      inputAttributes.forEach(function(attribute){
+        fieldInput.setAttributeNode(attribute);
+      })
+
+      const newFieldDiv = document.createElement("div");
+      const fieldName = document.createTextNode(`${capitalize(name)}: `);
+
+      newFieldDiv.appendChild(fieldName);
+      newFieldDiv.appendChild(fieldInput);
+
+      DOM.searchFieldsDiv.appendChild(newFieldDiv)
+    }
+
+    const ALL_COLUMNS = ["isbn", "title", "author", "publisher", "description", "subject"]
+
+    ALL_COLUMNS.forEach(function(column){
+      addSearchField(column);
+    })
 
     DOM.searchBars.forEach(function(searchBar) {
       searchBar.addEventListener("keyup", function(e){

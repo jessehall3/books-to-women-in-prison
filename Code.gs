@@ -249,12 +249,19 @@ function addToHashMap(response){
 }
 
 function buildFormula(searchGroups){
-  // =OR(REGEXMATCH(B2, "Har"), REGEXMATCH(D2, "Har"))
+  // each searchGroup:
+  // {
+  //   column: "title",
+  //   searchTerm: "harry"
+  // }
   var regexMatches = searchGroups.map(function(searchGroup){
     columnLetter = column_2_letter[searchGroup.column];
     searchTerms = searchGroup.searchTerms;
     return buildRegexMatch(columnLetter, searchTerms);
   });
+
+  // Final formula string will look like:
+  // =OR(REGEXMATCH(B2, "Harry"), REGEXMATCH(C2, "Rowling"))
   return "=OR(" + regexMatches.join(",") + ")"
 }
 
