@@ -4,10 +4,6 @@
     <base target="_top">
   </head>
   <body>
-    <!-- Title: <input type="text" id="title-input" data-column-name="title" class="search-bar" autocomplete="off" placeholder="War And Peace"> -->
-    <!-- <br> -->
-    <!-- Everything: <input type="text" id="everything-input" data-column-name="everything" class="search-bar" autocomplete="off" placeholder="Title, Author, etc."> -->
-    <!-- <br> -->
     <div id="search-fields"></div>
     <input type="button" value="Search" id="search-submit">
     <hr>
@@ -18,30 +14,22 @@
   (function() {
     const DOM = {};
     DOM.searchFieldsDiv = document.querySelector("#search-fields");
-    // DOM.titleInput = document.querySelector("#title-input");
-
-    const ALL_COLUMNS = [ "title", "author", "description", "everything"]
-
-    ALL_COLUMNS.forEach(function(column){
-      addSearchField(column);
-    })
-
     DOM.searchSubmit = document.querySelector("#search-submit");
-
-    DOM.searchFields =  document.querySelectorAll(".search-field");
-
     DOM.clearButton = document.querySelector("#clear-button");
     DOM.closeButton = document.querySelector("#close-button");
+
+    const searchFieldClass = ".search-field"
 
     function submitSearch(e){
       e.preventDefault();
       const allColumns = ["isbn", "title", "description"]
       const searchPairs = {}
       // TODO: refactor all this
-      DOM.searchFields.forEach(function(searchBar) {
-        const searchTerm = searchBar.value.trim();
+      const searchFields = document.querySelectorAll(searchFieldClass)
+      searchFields.forEach(function(searchField) {
+        const searchTerm = searchField.value.trim();
         if(searchTerm.length){
-          let columnNames = [searchBar.dataset.columnName];
+          let columnNames = [searchField.dataset.columnName];
           if(columnNames[0] == "everything"){
             columnNames = allColumns
           }
@@ -67,15 +55,14 @@
 
     function clearSearch(){
       google.script.run.clearSearchFilter();
-      DOM.searchBars.forEach(function(searchBar) {
-        searchBar.value = "";
+      const searchFields = document.querySelectorAll(searchFieldClass)
+      searchFields.forEach(function(searchField) {
+        searchField.value = "";
       })
     }
 
     function closeSidebar () {
-
-
-
+      clearSearch();
       google.script.host.close();
     }
 
@@ -85,7 +72,7 @@
       return string.charAt(0).toUpperCase() + string.slice(1);
     }
 
-    function addSearchField(name){
+    function addSearchField(fieldName){
       // Title: <input type="text" id="title-input"
       // data-column-name="title" class="search-field"
       // autocomplete="off">
@@ -102,6 +89,8 @@
       inputClass.value = `search-field`;
       inputAttributes.push(inputClass)
 
+      fieldInput.setAttribute("data-column-name", fieldName)
+
       const inputAutocomplete = document.createAttribute("autocomplete")
       inputAutocomplete.value = `off`;
       inputAttributes.push(inputAutocomplete)
@@ -111,25 +100,40 @@
       })
 
       const newFieldDiv = document.createElement("div");
-      const fieldName = document.createTextNode(`${capitalize(name)}: `);
+      const fieldLabel = document.createTextNode(`${capitalize(fieldName)}: `);
 
-      newFieldDiv.appendChild(fieldName);
+      newFieldDiv.appendChild(fieldLabel);
       newFieldDiv.appendChild(fieldInput);
 
       DOM.searchFieldsDiv.appendChild(newFieldDiv)
     }
 
-    DOM.searchFields.forEach(function(searchField) {
-      searchField.addEventListener("keyup", function(e){
-        if (e.keyCode === 13) {
-          submitSearch(e);
-        }
-      });
-    })
+    function addSearchFields(fields){
+      fields.forEach(function(column){
+        addSearchField(column);
 
-    DOM.searchSubmit.addEventListener("click", submitSearch);
-    DOM.clearButton.addEventListener("click", clearSearch);
-    DOM.closeButton.addEventListener("click", closeSidebar);
+        searchFieldDivs =  document.querySelectorAll(".search-field");
+
+        searchFieldDivs.forEach(function(searchField) {
+          searchField.addEventListener("keyup", function(e){
+            if (e.keyCode === 13) {
+              submitSearch(e);
+            }
+          });
+        })
+      })
+    }
+
+    function init(){
+      const FIELDS = [ "title", "author", "description", "everything"]
+      addSearchFields(FIELDS);
+
+      DOM.searchSubmit.addEventListener("click", submitSearch);
+      DOM.clearButton.addEventListener("click", clearSearch);
+      DOM.closeButton.addEventListener("click", closeSidebar);
+    }
+
+    init();
   })();
   </script>
 </html>
