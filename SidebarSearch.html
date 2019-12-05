@@ -26,17 +26,28 @@
 
     function submitSearch(e){
       e.preventDefault();
-      const searchGroups = []
+      const allColumns = ["isbn", "title", "description"]
+      const searchPairs = {}
+      // TODO: refactor all this
       DOM.searchBars.forEach(function(searchBar) {
-        const text = searchBar.value.trim();
-        if(text.length){
-          searchGroups.push({
-            column: searchBar.dataset.columnName,
-            text,
+        const searchTerm = searchBar.value.trim();
+        if(searchTerm.length){
+          let columnNames = [searchBar.dataset.columnName];
+          if(columnNames[0] == "everything"){
+            columnNames = allColumns
+          }
+          columnNames.forEach(function(columnName){
+            if(searchPairs[columnName]){
+              searchPairs[columnName].push(searchTerm)
+            }
+            else {
+              searchPairs[columnName] = [searchTerm]
+            }
           })
         }
       })
-      google.script.run.sidebarSearch(searchGroups)
+      alert(JSON.stringify(searchPairs))
+      // google.script.run.sidebarSearch(searchGroups)
     }
 
     function clearSearch(){

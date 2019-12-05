@@ -252,8 +252,8 @@ function buildFormula(searchGroups){
   // =OR(REGEXMATCH(B2, "Har"), REGEXMATCH(D2, "Har"))
   var regexMatches = searchGroups.map(function(searchGroup){
     columnLetter = column_2_letter[searchGroup.column];
-    searchText = searchGroup.text;
-    return buildRegexMatch(columnLetter, searchText);
+    searchTerms = searchGroup.searchTerms;
+    return buildRegexMatch(columnLetter, searchTerms);
   });
   return "=OR(" + regexMatches.join(",") + ")"
 }
