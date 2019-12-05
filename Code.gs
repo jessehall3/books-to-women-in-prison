@@ -250,8 +250,13 @@ function addToHashMap(response){
 function mergeSearchPairs(searchPairs){
   var merged = {}
 
-  for (var columnName in columnToletter){
-    merged[columnName] = []
+  function addToMerged(columnName, searchTerm){
+    if(merged[columnName]){
+      merged[columnName].push(searchTerm);
+    }
+    else {
+      merged[columnName] = [searchTerm];
+    }
   }
 
   searchPairs.forEach(function(searchPair){
@@ -260,20 +265,18 @@ function mergeSearchPairs(searchPairs){
 
     if(columnName == "everything"){
       for (var column in columnToletter){
-        merged[column].push(searchPair[1])
+        addToMerged(column, searchTerm);
       }
     }
     else {
-      merged[columnName].push(searchTerm)
+      addToMerged(columnName, searchTerm)
     }
   })
-//
+
   var mergedPairs = []
 
   for (var column in merged){
-    if (merged[column].length){
       mergedPairs.push([column, merged[column]])
-    }
   }
 
   ui.alert(JSON.stringify(mergedPairs, null, 2));
