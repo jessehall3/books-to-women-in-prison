@@ -23,21 +23,20 @@
 
     function submitSearch(e){
       e.preventDefault();
-      // TODO: refactor all this
-      const searchGroups = []
       const searchFields = document.querySelectorAll(SEARCH_FIELD_CLASS)
-      searchFields.forEach(function(searchField) {
+      searchPairs = []
+      searchFields.forEach(searchField => {
         const searchTerm = searchField.value.trim();
         if(searchTerm.length){
-          searchGroups.push({
-            column: searchField.dataset.columnName,
-            searchTerms: searchTerm,
-          })
+          searchPairs.push([
+            searchField.dataset.columnName,
+            searchTerm,
+          ])
         }
       })
-      alert(JSON.stringify(searchGroups, null, 2))
-      if(searchGroups.length){
-        // google.script.run.sidebarSearch(searchGroups)
+      alert(JSON.stringify(searchPairs, null, 2))
+      if(searchPairs.length){
+        // google.script.run.sidebarSearch(searchPairs)
       }
     }
 
