@@ -12,20 +12,22 @@
   </body>
   <script>
   (function() {
+    const SEARCH_FIELDS = [ "title", "author", "description", "everything"]
+    const SEARCH_FIELD_CLASS = ".search-field"
+
     const DOM = {};
     DOM.searchFieldsDiv = document.querySelector("#search-fields");
     DOM.searchSubmit = document.querySelector("#search-submit");
     DOM.clearButton = document.querySelector("#clear-button");
     DOM.closeButton = document.querySelector("#close-button");
 
-    const searchFieldClass = ".search-field"
 
     function submitSearch(e){
       e.preventDefault();
       const allColumns = ["isbn", "title", "description"]
       const searchPairs = {}
       // TODO: refactor all this
-      const searchFields = document.querySelectorAll(searchFieldClass)
+      const searchFields = document.querySelectorAll(SEARCH_FIELD_CLASS)
       searchFields.forEach(function(searchField) {
         const searchTerm = searchField.value.trim();
         if(searchTerm.length){
@@ -55,7 +57,7 @@
 
     function clearSearch(){
       google.script.run.clearSearchFilter();
-      const searchFields = document.querySelectorAll(searchFieldClass)
+      const searchFields = document.querySelectorAll(SEARCH_FIELD_CLASS)
       searchFields.forEach(function(searchField) {
         searchField.value = "";
       })
@@ -99,6 +101,12 @@
         fieldInput.setAttributeNode(attribute);
       })
 
+      fieldInput.addEventListener("keyup", function(e){
+        if (e.keyCode === 13) {
+          submitSearch(e);
+        }
+      });
+
       const newFieldDiv = document.createElement("div");
       const fieldLabel = document.createTextNode(`${capitalize(fieldName)}: `);
 
@@ -108,26 +116,12 @@
       DOM.searchFieldsDiv.appendChild(newFieldDiv)
     }
 
-    function addSearchFields(fields){
-      fields.forEach(function(column){
-        addSearchField(column);
-
-        searchFieldDivs =  document.querySelectorAll(".search-field");
-
-        searchFieldDivs.forEach(function(searchField) {
-          searchField.addEventListener("keyup", function(e){
-            if (e.keyCode === 13) {
-              submitSearch(e);
-            }
-          });
-        })
-      })
+    function addSearchFields(searchFields){
+      searchFields.forEach(searchField => addSearchField(searchField));
     }
 
     function init(){
-      const FIELDS = [ "title", "author", "description", "everything"]
-      addSearchFields(FIELDS);
-
+      addSearchFields(SEARCH_FIELDS);
       DOM.searchSubmit.addEventListener("click", submitSearch);
       DOM.clearButton.addEventListener("click", clearSearch);
       DOM.closeButton.addEventListener("click", closeSidebar);
