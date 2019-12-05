@@ -75,30 +75,24 @@
     }
 
     function addSearchField(fieldName){
-      // Title: <input type="text" id="title-input"
-      // data-column-name="title" class="search-field"
-      // autocomplete="off">
+      // Search Field DIV:
+      // <div>
+      //   Title: <input type="text" id="title-input"
+      //     data-column-name="title" class="search-field"
+      //     autocomplete="off">
+      // </div>
 
       const fieldInput = document.createElement("input");
 
-      const inputAttributes = []
-
-      const inputType = document.createAttribute("type")
-      inputType.value = "text";
-      inputAttributes.push(inputType)
-
-      const inputClass = document.createAttribute("class")
-      inputClass.value = `search-field`;
-      inputAttributes.push(inputClass)
-
-      fieldInput.setAttribute("data-column-name", fieldName)
-
-      const inputAutocomplete = document.createAttribute("autocomplete")
-      inputAutocomplete.value = `off`;
-      inputAttributes.push(inputAutocomplete)
+      const inputAttributes = [
+        ["type", "text"],
+        ["class", "search-field"],
+        ["data-column-name", fieldName],
+        ["autocomplete", "off"],
+      ]
 
       inputAttributes.forEach(function(attribute){
-        fieldInput.setAttributeNode(attribute);
+        fieldInput.setAttribute(...attribute);
       })
 
       fieldInput.addEventListener("keyup", function(e){
