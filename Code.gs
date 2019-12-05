@@ -284,33 +284,31 @@ function sidebarSearch(searchGroups){
     "userEnteredValue": buildFormula(searchGroups)
   }
 
-  ui.alert(buildFormula(searchGroups))
+  var booleanCondition = {
+    "type": "CUSTOM_FORMULA",
+    "values": [
+      conditionValue
+    ]
+  }
 
-  // var booleanCondition = {
-  //   "type": "CUSTOM_FORMULA",
-  //   "values": [
-  //     conditionValue
-  //   ]
-  // }
-  //
-  // var filterCriteria = {
-  //   "condition": booleanCondition
-  // };
-  //
-  // filterSettings.criteria = {};
-  //
-  // // column index makes no difference given the conditions used here
-  // var columnIndex = 0;
-  //
-  // filterSettings['criteria'][columnIndex] = filterCriteria;
-  //
-  // var request = {
-  //   "setBasicFilter": {
-  //     "filter": filterSettings
-  //   }
-  // };
-  //
-  // Sheets.Spreadsheets.batchUpdate({'requests': [request]}, workbook.getId());
+  var filterCriteria = {
+    "condition": booleanCondition
+  };
+
+  filterSettings.criteria = {};
+
+  // column index makes no difference given the conditions used here
+  var columnIndex = 0;
+
+  filterSettings['criteria'][columnIndex] = filterCriteria;
+
+  var request = {
+    "setBasicFilter": {
+      "filter": filterSettings
+    }
+  };
+
+  Sheets.Spreadsheets.batchUpdate({'requests': [request]}, workbook.getId());
 }
 
 function clearSearchFilter() {

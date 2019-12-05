@@ -46,8 +46,14 @@
           })
         }
       })
-      alert(JSON.stringify(searchPairs))
-      // google.script.run.sidebarSearch(searchGroups)
+      const searchGroups = Object.keys(searchPairs).map(function(key) {
+        return {
+          column: key,
+          searchTerms: searchPairs[key]
+        }
+      });
+      // alert(JSON.stringify(searchGroups, null, 2))
+      google.script.run.sidebarSearch(searchGroups)
     }
 
     function clearSearch(){
