@@ -4,10 +4,10 @@
     <base target="_top">
   </head>
   <body>
-    Title: <input type="text" id="title-input" data-column-name="title" class="search-bar" autocomplete="off" placeholder="War And Peace">
-    <br>
-    Everything: <input type="text" id="everything-input" data-column-name="everything" class="search-bar" autocomplete="off" placeholder="Title, Author, etc.">
-    <br>
+    <!-- Title: <input type="text" id="title-input" data-column-name="title" class="search-bar" autocomplete="off" placeholder="War And Peace"> -->
+    <!-- <br> -->
+    <!-- Everything: <input type="text" id="everything-input" data-column-name="everything" class="search-bar" autocomplete="off" placeholder="Title, Author, etc."> -->
+    <!-- <br> -->
     <div id="search-fields"></div>
     <input type="button" value="Search" id="search-submit">
     <hr>
@@ -18,10 +18,17 @@
   (function() {
     const DOM = {};
     DOM.searchFieldsDiv = document.querySelector("#search-fields");
-    DOM.titleInput = document.querySelector("#title-input");
+    // DOM.titleInput = document.querySelector("#title-input");
+
+    const ALL_COLUMNS = [ "title", "author", "description", "everything"]
+
+    ALL_COLUMNS.forEach(function(column){
+      addSearchField(column);
+    })
+
     DOM.searchSubmit = document.querySelector("#search-submit");
 
-    DOM.searchBars =  document.querySelectorAll(".search-bar");
+    DOM.searchFields =  document.querySelectorAll(".search-field");
 
     DOM.clearButton = document.querySelector("#clear-button");
     DOM.closeButton = document.querySelector("#close-button");
@@ -31,7 +38,7 @@
       const allColumns = ["isbn", "title", "description"]
       const searchPairs = {}
       // TODO: refactor all this
-      DOM.searchBars.forEach(function(searchBar) {
+      DOM.searchFields.forEach(function(searchBar) {
         const searchTerm = searchBar.value.trim();
         if(searchTerm.length){
           let columnNames = [searchBar.dataset.columnName];
@@ -112,14 +119,8 @@
       DOM.searchFieldsDiv.appendChild(newFieldDiv)
     }
 
-    const ALL_COLUMNS = ["isbn", "title", "author", "publisher", "description", "subject"]
-
-    ALL_COLUMNS.forEach(function(column){
-      addSearchField(column);
-    })
-
-    DOM.searchBars.forEach(function(searchBar) {
-      searchBar.addEventListener("keyup", function(e){
+    DOM.searchFields.forEach(function(searchField) {
+      searchField.addEventListener("keyup", function(e){
         if (e.keyCode === 13) {
           submitSearch(e);
         }
