@@ -3,7 +3,7 @@ var ISBN_COLUMN_LETTER = 'A';
 var TITLE_COLUMN_LETTER = 'B';
 var DESCRIPTION_COLUMN_LETTER = 'E';
 
-var column_2_letter {
+var column_2_letter = {
   "isbn": ISBN_COLUMN_LETTER,
   "title": TITLE_COLUMN_LETTER,
   "description": DESCRIPTION_COLUMN_LETTER,
@@ -248,6 +248,16 @@ function addToHashMap(response){
   return map;
 }
 
+function buildFormula(searchGroups){
+  // =OR(REGEXMATCH(B2, "Har"), REGEXMATCH(D2, "Har"))
+  var regexMatches = searchGroups.map(function(searchGroup){
+    columnLetter = column_2_letter[searchGroup.column];
+    searchText = searchGroup.text;
+    return buildRegexMatch(columnLetter, searchText);
+  });
+  return "=OR(" + regexMatches.join(",") + ")"
+}
+
 function buildRegexMatch(column, searchTerms){
   // accept single values and arrays
   searchTerms = [].concat(searchTerms)
@@ -260,10 +270,10 @@ function buildRegexMatch(column, searchTerms){
 
   var range = column + ":" + column;
 
-  return "=REGEXMATCH(" + range + "," +  regex + ")";
+  return "REGEXMATCH(" + range + "," +  regex + ")";
 }
 
-function setSearchFilter(searchTerms, columnLetter){
+function sidebarSearch(searchGroups){
   var filterSettings = {};
 
   filterSettings.range = {
@@ -271,43 +281,37 @@ function setSearchFilter(searchTerms, columnLetter){
   };
 
   var conditionValue = {
-    "userEnteredValue": buildRegexMatch(columnLetter, searchTerms)
+    "userEnteredValue": buildFormula(searchGroups)
   }
 
-  var booleanCondition = {
-    "type": "CUSTOM_FORMULA",
-    "values": [
-      conditionValue
-    ]
-  }
+  ui.alert(buildFormula(searchGroups))
 
-  var filterCriteria = {
-    "condition": booleanCondition
-  };
-
-  filterSettings.criteria = {};
-
-  // column index makes no difference given the conditions used here
-  var columnIndex = 0;
-
-  filterSettings['criteria'][columnIndex] = filterCriteria;
-
-  var request = {
-    "setBasicFilter": {
-      "filter": filterSettings
-    }
-  };
-
-  Sheets.Spreadsheets.batchUpdate({'requests': [request]}, workbook.getId());
+  // var booleanCondition = {
+  //   "type": "CUSTOM_FORMULA",
+  //   "values": [
+  //     conditionValue
+  //   ]
+  // }
+  //
+  // var filterCriteria = {
+  //   "condition": booleanCondition
+  // };
+  //
+  // filterSettings.criteria = {};
+  //
+  // // column index makes no difference given the conditions used here
+  // var columnIndex = 0;
+  //
+  // filterSettings['criteria'][columnIndex] = filterCriteria;
+  //
+  // var request = {
+  //   "setBasicFilter": {
+  //     "filter": filterSettings
+  //   }
+  // };
+  //
+  // Sheets.Spreadsheets.batchUpdate({'requests': [request]}, workbook.getId());
 }
-
-function setTitleFilter(searchTerm){
-  setSearchFilter(searchTerm, TITLE_COLUMN_LETTER)
-}
-
-// function setIsbnFilter(isbnNumbers){
-//   setSearchFilter(isbnNumbers, ISBN_COLUMN_LETTER)
-// }
 
 function clearSearchFilter() {
   var filter = {
