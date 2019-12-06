@@ -37,12 +37,15 @@
       if(searchPairs.length){
         google.script.run.sidebarSearch(searchPairs)
       }
+      else{
+        clearSearch();
+      }
     }
 
     function clearSearch(){
       google.script.run.clearSearchFilter();
       const searchFields = document.querySelectorAll(SEARCH_FIELD_CLASS)
-      searchFields.forEach(function(searchField) {
+      searchFields.forEach(searchField => {
         searchField.value = "";
       })
     }
@@ -75,11 +78,11 @@
         ["autocomplete", "off"],
       ]
 
-      inputAttributes.forEach(function(attribute){
+      inputAttributes.forEach(attribute => {
         fieldInput.setAttribute(...attribute);
       })
 
-      fieldInput.addEventListener("keyup", function(e){
+      fieldInput.addEventListener("keyup", e => {
         if (e.keyCode === 13) {
           submitSearch(e);
         }
