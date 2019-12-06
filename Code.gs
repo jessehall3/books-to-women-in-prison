@@ -21,6 +21,7 @@ function onOpen() {
   ui.createMenu('Book Inventory')
       .addItem('Add Books', 'menuItem1')
       .addItem('Search', 'menuItem2')
+      .addItem('Sidebar Search', 'menuItem2')
       .addToUi();
 }
 
