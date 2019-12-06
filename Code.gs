@@ -279,26 +279,7 @@ function mergeSearchPairs(searchPairs){
       mergedPairs.push([column, merged[column]])
   }
 
-  ui.alert(JSON.stringify(mergedPairs, null, 2));
-}
-
-function buildFormula(searchPairs){
-  // each searchPair:
-  // [
-  //   "title", // column name
-  //   "harry" // search term
-  // ]
-  var mergedPairs = mergeSearchPairs(searchPairs);
-
-  // var regexMatches = searchPairs.map(function(searchPair){
-  //   columnLetter = columnToletter[searchPair.column];
-  //   searchTerms = searchPair.searchTerms;
-  //   return buildRegexMatch(columnLetter, searchTerms);
-  // });
-
-  // Final formula string will look like:
-  // =OR(REGEXMATCH(B2, "Harry"), REGEXMATCH(C2, "Rowling"))
-  // return "=OR(" + regexMatches.join(",") + ")"
+  return mergedPairs;
 }
 
 function buildRegexMatch(column, searchTerms){
@@ -316,6 +297,25 @@ function buildRegexMatch(column, searchTerms){
   return "REGEXMATCH(" + range + "," +  regex + ")";
 }
 
+function buildFormula(searchPairs){
+  // each searchPair:
+  // [
+  //   "title", // column name
+  //   "harry potter", "eat, pray, love" // search terms
+  // ]
+  var mergedPairs = mergeSearchPairs(searchPairs);
+
+  var regexMatches = mergedPairs.map(function(searchPair){
+    columnLetter = columnToletter[searchPair[0]];
+    searchTerms = searchPair[1];
+    return buildRegexMatch(columnLetter, searchTerms);
+  });
+
+  // Final formula string will look like:
+  // =OR(REGEXMATCH(B2, "Harry"), REGEXMATCH(C2, "Rowling"))
+  return "=OR(" + regexMatches.join(",") + ")"
+}
+
 function sidebarSearch(searchPairs){
   var filterSettings = {};
 
@@ -327,31 +327,31 @@ function sidebarSearch(searchPairs){
     "userEnteredValue": buildFormula(searchPairs)
   }
 
-  // var booleanCondition = {
-  //   "type": "CUSTOM_FORMULA",
-  //   "values": [
-  //     conditionValue
-  //   ]
-  // }
-  //
-  // var filterCriteria = {
-  //   "condition": booleanCondition
-  // };
-  //
-  // filterSettings.criteria = {};
-  //
-  // // column index makes no difference given the conditions used here
-  // var columnIndex = 0;
-  //
-  // filterSettings['criteria'][columnIndex] = filterCriteria;
-  //
-  // var request = {
-  //   "setBasicFilter": {
-  //     "filter": filterSettings
-  //   }
-  // };
-  //
-  // Sheets.Spreadsheets.batchUpdate({'requests': [request]}, workbook.getId());
+  var booleanCondition = {
+    "type": "CUSTOM_FORMULA",
+    "values": [
+      conditionValue
+    ]
+  }
+
+  var filterCriteria = {
+    "condition": booleanCondition
+  };
+
+  filterSettings.criteria = {};
+
+  // column index makes no difference given the conditions used here
+  var columnIndex = 0;
+
+  filterSettings['criteria'][columnIndex] = filterCriteria;
+
+  var request = {
+    "setBasicFilter": {
+      "filter": filterSettings
+    }
+  };
+
+  Sheets.Spreadsheets.batchUpdate({'requests': [request]}, workbook.getId());
 }
 
 function clearSearchFilter() {
