@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+  </head>
+  <body>
+    <div id="search-fields"></div>
+    <input type="button" value="Search" id="search-submit">
+    <hr>
+    <input type="submit" value="Clear" id="clear-button"/>
+    <input type="button" value="Close" id="close-button"/>
+  </body>
+  <script>
+  (function() {
+    const SEARCH_FIELDS = [ "title", "author", "description", "everything"]
+    const SEARCH_FIELD_CLASS = ".search-field"
+
+    const DOM = {};
+    DOM.searchFieldsDiv = document.querySelector("#search-fields");
+    DOM.searchSubmit = document.querySelector("#search-submit");
+    DOM.clearButton = document.querySelector("#clear-button");
+    DOM.closeButton = document.querySelector("#close-button");
+
+    function submitSearch(e){
+      e.preventDefault();
+      const searchFields = document.querySelectorAll(SEARCH_FIELD_CLASS)
+      searchPairs = []
+      searchFields.forEach(searchField => {
+        const searchTerm = searchField.value.trim();
+        if(searchTerm.length){
+          searchPairs.push([
+            searchField.dataset.columnName,
+            searchTerm,
+          ])
+        }
+      })
+      if(searchPairs.length){
+        google.script.run.sidebarSearch(searchPairs)
+      }
+      else{
+        clearSearch();
+      }
+    }
+
+    function clearSearch(){
+      google.script.run.clearSearchFilter();
+      const searchFields = document.querySelectorAll(SEARCH_FIELD_CLASS)
+      searchFields.forEach(searchField => {
+        searchField.value = "";
+      })
+    }
+
+    function closeSidebar () {
+      clearSearch();
+      google.script.host.close();
+    }
+
+    // From: https://stackoverflow.com/a/1026087
+    // Steve Harrison: https://stackoverflow.com/users/48492/steve-harrison
+    function capitalize(string) {
+      return string.charAt(0).toUpperCase() + string.slice(1);
+    }
+
+    function addSearchField(fieldName){
+      // Search Field DIV:
+      // <div>
+      //   Title: <input type="text" id="title-input"
+      //     data-column-name="title" class="search-field"
+      //     autocomplete="off">
+      // </div>
+
+      const fieldInput = document.createElement("input");
+
+      const inputAttributes = [
+        ["type", "text"],
+        ["class", "search-field"],
+        ["data-column-name", fieldName],
+        ["autocomplete", "off"],
+      ]
+
+      inputAttributes.forEach(attribute => {
+        fieldInput.setAttribute(...attribute);
+      })
+
+      fieldInput.addEventListener("keyup", e => {
+        if (e.keyCode === 13) {
+          submitSearch(e);
+        }
+      });
+
+      const newFieldDiv = document.createElement("div");
+      const fieldLabel = document.createTextNode(`${capitalize(fieldName)}: `);
+
+      newFieldDiv.appendChild(fieldLabel);
+      newFieldDiv.appendChild(fieldInput);
+
+      DOM.searchFieldsDiv.appendChild(newFieldDiv)
+    }
+
+    function initialize(){
+      SEARCH_FIELDS.map(addSearchField);
+      DOM.searchSubmit.addEventListener("click", submitSearch);
+      DOM.clearButton.addEventListener("click", clearSearch);
+      DOM.closeButton.addEventListener("click", closeSidebar);
+    }
+
+    initialize();
+  })();
+  </script>
+</html>

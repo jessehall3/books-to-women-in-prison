@@ -1,13 +1,25 @@
 var ui = SpreadsheetApp.getUi();
 var breakTag = '<br>';
 var sheet = SpreadsheetApp.getActiveSheet();
+var workbook = SpreadsheetApp.getActive();
+var BOOKS_SPREADSHEET_NAME = "Books";
+var booksSpreadSheet = workbook.getSheetByName(BOOKS_SPREADSHEET_NAME);
+var columnToletter = {
+  "isbn": "A",
+  "title": "B",
+  "author": "C",
+  "publisher": "D",
+  "description": "E",
+  "subject": "F"
+}
 
 
 //Add menu items on Google Sheets
 function onOpen() {
   ui.createMenu('Book Inventory')
       .addItem('Add Books', 'menuItem1')
-      .addItem('Search', 'menuItem2')
+      //.addItem('Search', 'menuItem2')
+      .addItem('Search', 'menuItem3') // This is the search menu within the sidebar.
       .addToUi();
 }
 
@@ -28,6 +40,14 @@ function menuItem2() {
   .setHeight(800);
   SpreadsheetApp.getUi() 
      .showModalDialog(html, 'Search');
+}
+
+function menuItem3() {
+  var html = HtmlService.createHtmlOutputFromFile('SidebarSearch')
+    .setTitle('Search Books')
+    .setWidth(300);
+  SpreadsheetApp.getUi()
+    .showSidebar(html);
 }
 
 function processForm(formObject) {
@@ -226,3 +246,118 @@ function addToHashMap(response){
   return map;
 }
 
+function mergeSearchPairs(searchPairs){
+  var merged = {}
+
+  function addToMerged(columnName, searchTerm){
+    if(merged[columnName]){
+      merged[columnName].push(searchTerm);
+    }
+    else {
+      merged[columnName] = [searchTerm];
+    }
+  }
+
+  searchPairs.forEach(function(searchPair){
+    var columnName = searchPair[0]
+    var searchTerm  = searchPair[1]
+
+    if(columnName == "everything"){
+      for (var column in columnToletter){
+        addToMerged(column, searchTerm);
+      }
+    }
+    else {
+      addToMerged(columnName, searchTerm)
+    }
+  })
+
+  var mergedPairs = []
+
+  for (var column in merged){
+      mergedPairs.push([column, merged[column]])
+  }
+
+  return mergedPairs;
+}
+
+function buildRegexMatch(searchPair){
+  var columnName = searchPair[0];
+  var columnLetter = columnToletter[columnName];
+
+  var searchTerms = searchPair[1];
+  var joinedTerms = searchTerms.join("|");
+
+  // case-insensitive regex regex_pattern for entire column
+  // =REGEXMATCH(B:B, \(?i)Harry Potter\)
+  var regex = "\"(?i)" + joinedTerms + "\"";
+
+  var range = columnLetter + ":" + columnLetter;
+
+  return "REGEXMATCH(" + range + "," +  regex + ")";
+}
+
+function buildFormula(searchPairs){
+  // searchPair:
+  // [
+  //   "title", // column name
+  //   "harry potter", "eat, pray, love" // search terms
+  // ]
+  var mergedPairs = mergeSearchPairs(searchPairs);
+
+  // ['REGEXMATCH(B2, "Harry")', 'REGEXMATCH(C2, "Rowling")']'
+  var regexMatches = mergedPairs.map(buildRegexMatch);
+
+  // =OR(REGEXMATCH(B2, "Harry"), REGEXMATCH(C2, "Rowling"))
+  return "=OR(" + regexMatches.join(",") + ")"
+}
+
+function sidebarSearch(searchPairs){
+  var filterSettings = {};
+
+  filterSettings.range = {
+    sheetId: booksSpreadSheet.getSheetId()
+  };
+
+  var conditionValue = {
+    "userEnteredValue": buildFormula(searchPairs)
+  }
+
+  var booleanCondition = {
+    "type": "CUSTOM_FORMULA",
+    "values": [
+      conditionValue
+    ]
+  }
+
+  var filterCriteria = {
+    "condition": booleanCondition
+  };
+
+  filterSettings.criteria = {};
+
+  // column index makes no difference given the conditions used here
+  var columnIndex = 0;
+
+  filterSettings['criteria'][columnIndex] = filterCriteria;
+
+  var request = {
+    "setBasicFilter": {
+      "filter": filterSettings
+    }
+  };
+
+  Sheets.Spreadsheets.batchUpdate({'requests': [request]}, workbook.getId());
+}
+
+function clearSearchFilter() {
+  var filter = {
+    sheetId: booksSpreadSheet.getSheetId()
+  };
+
+  var request = {
+    "clearBasicFilter": filter
+  };
+
+  Sheets.Spreadsheets.batchUpdate({'requests': [request]}, workbook.getId());
+}
