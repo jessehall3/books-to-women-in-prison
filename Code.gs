@@ -1,5 +1,9 @@
+var ui = SpreadsheetApp.getUi();
+var breakTag = '<br>';
+var sheet = SpreadsheetApp.getActiveSheet();
+var workbook = SpreadsheetApp.getActive();
 var BOOKS_SPREADSHEET_NAME = "Books";
-
+var booksSpreadSheet = workbook.getSheetByName(BOOKS_SPREADSHEET_NAME);
 var columnToletter = {
   "isbn": "A",
   "title": "B",
@@ -9,19 +13,13 @@ var columnToletter = {
   "subject": "F"
 }
 
-var ui = SpreadsheetApp.getUi();
-var breakTag = '<br>';
-var sheet = SpreadsheetApp.getActiveSheet();
-var workbook = SpreadsheetApp.getActive();
-var booksSpreadSheet = workbook.getSheetByName(BOOKS_SPREADSHEET_NAME);
-
 
 //Add menu items on Google Sheets
 function onOpen() {
   ui.createMenu('Book Inventory')
       .addItem('Add Books', 'menuItem1')
-      .addItem('Search', 'menuItem2')
-      .addItem('Sidebar Search', 'menuItem2')
+      //.addItem('Search', 'menuItem2')
+      .addItem('Search', 'menuItem3') // This is the search menu within the sidebar.
       .addToUi();
 }
 
