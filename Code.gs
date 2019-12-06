@@ -281,36 +281,33 @@ function mergeSearchPairs(searchPairs){
   return mergedPairs;
 }
 
-function buildRegexMatch(column, searchTerms){
-  // accept single values and arrays
-  searchTerms = [].concat(searchTerms)
+function buildRegexMatch(searchPair){
+  var columnName = searchPair[0];
+  var columnLetter = columnToletter[columnName];
 
-  var joinedTerms = searchTerms.join("|")
+  var searchTerms = searchPair[1];
+  var joinedTerms = searchTerms.join("|");
 
   // case-insensitive regex regex_pattern for entire column
   // =REGEXMATCH(B:B, \(?i)Harry Potter\)
   var regex = "\"(?i)" + joinedTerms + "\"";
 
-  var range = column + ":" + column;
+  var range = columnLetter + ":" + columnLetter;
 
   return "REGEXMATCH(" + range + "," +  regex + ")";
 }
 
 function buildFormula(searchPairs){
-  // each searchPair:
+  // searchPair:
   // [
   //   "title", // column name
   //   "harry potter", "eat, pray, love" // search terms
   // ]
   var mergedPairs = mergeSearchPairs(searchPairs);
 
-  var regexMatches = mergedPairs.map(function(searchPair){
-    columnLetter = columnToletter[searchPair[0]];
-    searchTerms = searchPair[1];
-    return buildRegexMatch(columnLetter, searchTerms);
-  });
+  // ['REGEXMATCH(B2, "Harry")', 'REGEXMATCH(C2, "Rowling")']'
+  var regexMatches = mergedPairs.map(buildRegexMatch);
 
-  // Final formula string will look like:
   // =OR(REGEXMATCH(B2, "Harry"), REGEXMATCH(C2, "Rowling"))
   return "=OR(" + regexMatches.join(",") + ")"
 }
